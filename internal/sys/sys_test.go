@@ -11,9 +11,9 @@ func TestCall(t *testing.T) {
 		stdout := new(strings.Builder)
 		stderr := new(strings.Builder)
 
-		code := call(stdout, stderr, "go", "version")
+		code := call(stdout, stderr, "uname")
 
-		if !strings.Contains(stdout.String(), "go version go") {
+		if len(stdout.String()) == 0 {
 			t.Fatal("Stdout", stdout.String())
 		}
 

@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256|SHA512] [-Z ARCHIVE] [-F FILE] [SYSROOT]
+//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [SYSROOT]
 //
 // The flags are:
 //
@@ -61,7 +61,7 @@ func main() {
 	flag.Parse()
 
 	if *h {
-		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256|SHA512] [-Z ARCHIVE] [-F FILE] [SYSROOT]")
+		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [SYSROOT]")
 	}
 
 	if *v {

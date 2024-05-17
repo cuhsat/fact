@@ -3,29 +3,18 @@ package ffind
 
 import (
 	"archive/zip"
-	"crypto/md5"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"fmt"
-	"hash"
-	"hash/crc32"
 	"io"
 	"os"
-	"strings"
 	"sync"
 	"time"
 
+	"github.com/cuhsat/fact/internal/hash"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/windows"
 )
 
 const (
-	CRC32  = "crc32"
-	MD5    = "md5"
-	SHA1   = "sha1"
-	SHA256 = "sha256"
-	SHA512 = "sha512"
 	rLimit = 1024
 )
 
@@ -34,15 +23,15 @@ type ffind struct {
 
 	sysroot string
 	archive string
-	hash    string
+	algo    string
 	rp      bool
 	so      bool
 	uo      bool
 }
 
-func Find(sysroot, archive, hash string, rp, so, uo bool) (lines []string) {
+func Find(sysroot, archive, algo string, rp, so, uo bool) (lines []string) {
 	// Going into live mode
-	if len(sysroot)+len(archive)+len(hash) == 0 {
+	if len(sysroot)+len(archive)+len(algo) == 0 {
 		host, err := os.Hostname()
 
 		if err != nil {
@@ -51,13 +40,13 @@ func Find(sysroot, archive, hash string, rp, so, uo bool) (lines []string) {
 		}
 
 		archive = host + ".zip"
-		hash = SHA256
+		algo = hash.SHA256
 	}
 
 	ff := &ffind{
 		sysroot: sysroot,
 		archive: archive,
-		hash:    hash,
+		algo:    algo,
 		rp:      rp,
 		so:      so,
 		uo:      uo,
@@ -128,6 +117,7 @@ func (ff *ffind) zip(in, out chan string) {
 
 	defer a.Close()
 
+	// TODO: move to internal/zip
 	w := zip.NewWriter(a)
 
 	defer w.Close()
@@ -168,53 +158,21 @@ func (ff *ffind) log(in, out chan string) {
 	defer close(out)
 	defer ff.wg.Done()
 
-	var h hash.Hash
-
-	switch strings.ToLower(ff.hash) {
-	case CRC32:
-		h = crc32.NewIEEE()
-	case MD5:
-		h = md5.New()
-	case SHA1:
-		h = sha1.New()
-	case SHA256:
-		h = sha256.New()
-	case SHA512:
-		h = sha512.New()
-	default:
-		if len(ff.hash) > 0 {
-			sys.Error("hash not supported:", ff.hash)
-		}
-	}
-
-	if h == nil {
-		for artifact := range in {
-			out <- ff.path(artifact)
-		}
-
-		return
-	}
-
 	for artifact := range in {
-		h.Reset()
+		p := ff.path(artifact)
 
-		src, err := os.Open(artifact)
+		if len(ff.algo) > 0 {
+			s, err := hash.Sum(artifact, ff.algo)
 
-		if err != nil {
-			sys.Error(err)
-			continue
+			if err != nil {
+				sys.Error(err)
+				continue
+			}
+
+			out <- fmt.Sprintf("%x  %s", s, p)
+		} else {
+			out <- p
 		}
-
-		_, err = io.Copy(h, src)
-
-		src.Close()
-
-		if err != nil {
-			sys.Error(err)
-			continue
-		}
-
-		out <- fmt.Sprintf("%x %s", h.Sum(nil), ff.path(artifact))
 	}
 }
 

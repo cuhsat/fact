@@ -2,12 +2,14 @@
 Mount forensic raw or dd disk images for read-only processing.
 
 ```sh
-$ fmount.dd [-fsuzhv] [-D DIRECTORY] IMAGE
+$ fmount.dd [-fsuzhv] [-H CRC32|MD5|SHA1|SHA256|SHA512] [-V SUM] [-D DIRECTORY] IMAGE
 ```
 
 Available options:
 
 - `-D` Mount point
+- `-H` Hash algorithm
+- `-V` Verify hash sum
 - `-f` Force type
 - `-s` System partition only
 - `-u` Unmount image

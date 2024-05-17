@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount [-suzhv] [-T RAW|DD] [-D DIRECTORY] IMAGE
+//	fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256|SHA512] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
 //
 // The flags are:
 //
@@ -10,6 +10,10 @@
 //		The mount point directory.
 //	 -T type
 //	    The disk image type.
+//	 -H algorithm
+//	 	The hash algorithm to use.
+//	 -V sum
+//	 	The hash sum to verify.
 //	 -s
 //		System partition only.
 //	 -u
@@ -42,6 +46,8 @@ var Version string = "dev"
 func main() {
 	D := flag.String("D", "", "Mount point")
 	T := flag.String("T", "", "Image type")
+	H := flag.String("H", "", "Hash algorithm")
+	V := flag.String("V", "", "Hash sum")
 	s := flag.Bool("s", false, "System partition only")
 	u := flag.Bool("u", false, "Unmount image")
 	z := flag.Bool("z", false, "Unzip image")
@@ -58,7 +64,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzhv] [-T RAW|DD] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256|SHA512] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE")
 	}
 
 	it, err := fmount.DetectType(img, *T)
@@ -71,6 +77,14 @@ func main() {
 
 	if len(*D) > 0 {
 		args = append(args, "-D", *D)
+	}
+
+	if len(*H) > 0 {
+		args = append(args, "-H", *H)
+	}
+
+	if len(*V) > 0 {
+		args = append(args, "-V", *V)
 	}
 
 	if *s {

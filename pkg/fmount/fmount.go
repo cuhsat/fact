@@ -3,11 +3,13 @@ package fmount
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
+	"github.com/cuhsat/fact/internal/hash"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/internal/zip"
 	"github.com/cuhsat/fact/pkg/fmount/dd"
@@ -51,6 +53,18 @@ func Extract(img string) (p string, err error) {
 	if err = zip.Unzip(img, dir); err != nil {
 		return
 	}
+
+	return
+}
+
+func Verify(img, algo, sum string) (ok bool, err error) {
+	b, err := hash.Sum(img, algo)
+
+	if err != nil {
+		return
+	}
+
+	ok = fmt.Sprintf("%x", b) == strings.ToLower(sum)
 
 	return
 }

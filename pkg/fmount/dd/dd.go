@@ -24,9 +24,7 @@ func Is(img string) (is bool, err error) {
 
 func Mount(img, dir string, so bool) (sysroot string, err error) {
 	if len(dir) == 0 {
-		b := filepath.Base(img)
-
-		dir = strings.TrimSuffix(b, filepath.Ext(b))
+		dir = baseFile(img)
 	}
 
 	if err = os.MkdirAll(dir, mode); err != nil {
@@ -149,6 +147,12 @@ func Unmount(img string) (err error) {
 	}
 
 	return
+}
+
+func baseFile(name string) string {
+	b := filepath.Base(name)
+
+	return strings.TrimSuffix(b, filepath.Ext(b))
 }
 
 func detectMagic(name string) (has bool, err error) {

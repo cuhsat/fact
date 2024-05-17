@@ -28,12 +28,6 @@ func DetectType(img, t string) (string, error) {
 }
 
 func Extract(img string) (p string, err error) {
-	dir, err := os.Getwd()
-
-	if err != nil {
-		return
-	}
-
 	i, err := zip.Index(img)
 
 	if err != nil {
@@ -45,11 +39,18 @@ func Extract(img string) (p string, err error) {
 		return
 	}
 
-	if err = zip.Unzip(img, dir); err != nil {
+	dir := filepath.Dir(img)
+
+	p = path.Join(dir, i[0])
+
+	if _, err = os.Stat(p); !os.IsNotExist(err) {
+		err = errors.New("file already exists")
 		return
 	}
 
-	p = path.Join(dir, i[0])
+	if err = zip.Unzip(img, dir); err != nil {
+		return
+	}
 
 	return
 }

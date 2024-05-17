@@ -7,7 +7,7 @@ import (
 )
 
 func TestCall(t *testing.T) {
-	t.Run("Test layered call", func(t *testing.T) {
+	t.Run("Test call", func(t *testing.T) {
 		stdout := new(strings.Builder)
 		stderr := new(strings.Builder)
 

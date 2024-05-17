@@ -24,4 +24,5 @@ go.work
 bin/
 *.dd
 *.zip
-!internal/testdata/*
+!internal/testdata/windows.zip
+!internal/testdata/windows.dd.zip

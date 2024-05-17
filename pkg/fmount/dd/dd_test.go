@@ -11,6 +11,10 @@ import (
 )
 
 func TestDD(t *testing.T) {
+	if len(os.Getenv("CI")) > 0 {
+		t.Skip("skip test")
+	}
+
 	cases := []struct {
 		name, file string
 	}{

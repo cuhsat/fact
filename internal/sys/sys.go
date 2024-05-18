@@ -30,18 +30,28 @@ func Usage(u string) {
 	os.Exit(2)
 }
 
-func Input() string {
-	if flag.NArg() > 0 {
-		return flag.Arg(0)
-	} else {
-		stdin, err := Stdin()
+func Param() (p string) {
+	l := Params()
 
-		if err != nil {
-			Fatal(err)
-		}
-
-		return stdin
+	if len(l) > 0 {
+		p = l[0]
 	}
+
+	return
+}
+
+func Params() []string {
+	if flag.NArg() > 0 {
+		return flag.Args()
+	}
+
+	stdin, err := Stdin()
+
+	if err != nil {
+		Fatal(err)
+	}
+
+	return strings.Split(stdin, "\n")
 }
 
 func Stdin() (in string, err error) {

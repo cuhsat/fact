@@ -72,7 +72,7 @@ func main() {
 		sys.Fatal("archive name required")
 	}
 
-	files := ffind.Find(sys.Input(), *Z, *H, *r, *s, *u)
+	files := ffind.Find(sys.Param(), *Z, *H, *r, *s, *u)
 
 	if len(*F) > 0 {
 		b := []byte(strings.Join(files, "\n"))

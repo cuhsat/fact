@@ -2,15 +2,14 @@
 package ffind
 
 import (
-	"archive/zip"
 	"fmt"
-	"io"
 	"os"
 	"sync"
 	"time"
 
 	"github.com/cuhsat/fact/internal/hash"
 	"github.com/cuhsat/fact/internal/sys"
+	"github.com/cuhsat/fact/internal/zip"
 	"github.com/cuhsat/fact/pkg/windows"
 )
 
@@ -30,19 +29,6 @@ type ffind struct {
 }
 
 func Find(sysroot, archive, algo string, rp, so, uo bool) (lines []string) {
-	// Going into live mode
-	if len(sysroot)+len(archive)+len(algo) == 0 {
-		host, err := os.Hostname()
-
-		if err != nil {
-			sys.Error(err)
-			host = "fact" // fallback
-		}
-
-		archive = host + ".zip"
-		algo = hash.SHA256
-	}
-
 	ff := &ffind{
 		sysroot: sysroot,
 		archive: archive,
@@ -52,22 +38,20 @@ func Find(sysroot, archive, algo string, rp, so, uo bool) (lines []string) {
 		uo:      uo,
 	}
 
+	// Go into live mode?
+	if len(ff.sysroot)+len(ff.archive)+len(ff.algo) == 0 {
+		ff.live()
+	}
+
 	ch1 := make(chan string, rLimit)
 	ch2 := make(chan string, rLimit)
 	ch3 := make(chan string, rLimit)
 
-	if len(ff.archive) > 0 {
-		ff.wg.Add(3)
+	ff.wg.Add(3)
 
-		go ff.find(ch1)
-		go ff.zip(ch1, ch2)
-		go ff.log(ch2, ch3)
-	} else {
-		ff.wg.Add(2)
-
-		go ff.find(ch1)
-		go ff.log(ch1, ch3)
-	}
+	go ff.find(ch1)
+	go ff.zip(ch1, ch2)
+	go ff.log(ch2, ch3)
 
 	for l := range ch3 {
 		lines = append(lines, l)
@@ -103,58 +87,37 @@ func (ff *ffind) find(out chan<- string) {
 	}
 }
 
-func (ff *ffind) zip(in, out chan string) {
+func (ff *ffind) zip(in <-chan string, out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
 
-	// TODO: file init after something was found
-	a, err := os.Create(ff.archive)
-
-	if err != nil {
-		sys.Error(err)
-		return
-	}
-
-	defer a.Close()
-
-	// TODO: move to internal/zip
-	w := zip.NewWriter(a)
-
-	defer w.Close()
-
-	w.SetComment(time.Now().Format(time.RFC3339))
+	var z *zip.Zip
+	var err error
 
 	for artifact := range in {
+		if len(ff.archive) > 0 {
+			if z == nil {
+				z, err = zip.NewZip(ff.archive, time.Now().Format(time.RFC3339))
 
-		src, err := os.Open(artifact)
+				if err != nil {
+					sys.Fatal(err)
+				}
 
-		if err != nil {
-			sys.Error(err)
-			continue
-		}
+				defer z.Close()
+			}
 
-		dst, err := w.Create(ff.path(artifact))
+			err := z.Write(artifact, ff.path(artifact))
 
-		if err != nil {
-			sys.Error(err)
-			src.Close()
-			continue
-		}
-
-		_, err = io.Copy(dst, src)
-
-		src.Close()
-
-		if err != nil {
-			sys.Error(err)
-			continue
+			if err != nil {
+				sys.Error(err)
+			}
 		}
 
 		out <- artifact
 	}
 }
 
-func (ff *ffind) log(in, out chan string) {
+func (ff *ffind) log(in <-chan string, out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
 
@@ -174,6 +137,19 @@ func (ff *ffind) log(in, out chan string) {
 			out <- p
 		}
 	}
+}
+
+func (ff *ffind) live() {
+	host, err := os.Hostname()
+
+	if err != nil {
+		host = "fact" // fallback
+		sys.Error(err)
+	}
+
+	ff.archive = host + ".zip"
+	ff.algo = hash.SHA256
+	// TODO: add file for hash output
 }
 
 func (ff *ffind) path(f string) string {

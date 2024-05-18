@@ -57,7 +57,7 @@ func main() {
 	flag.CommandLine.SetOutput(io.Discard)
 	flag.Parse()
 
-	img := sys.Input()
+	img := sys.Param()
 
 	if *v {
 		sys.Print("fmount", Version)

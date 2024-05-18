@@ -27,7 +27,7 @@ func EnumSystem(sysroot string, out chan<- string) {
 		"[Ss]ystem32/[Cc]onfig/[Ss][Ee][Cc][Uu][Rr][Ii][Tt][Yy]",
 		"[Ss]ystem32/[Cc]onfig/[Ss][Oo][Ff][Tt][Ww][Aa][Rr][Ee]",
 		"[Ss]ystem32/[Cc]onfig/[Ss][Yy][Ss][Tt][Ee][Mm]",
-		"[Ss]ystem32/[Ww]inevt/[Ll]ogs/*.evtx",
+		"[Ss]ystem32/[Ww]inevt/[Ll]ogs/*.evt*",
 		"[Pp]refetch/*.pf",
 		"[Aa]m[Cc]ompat/[Pp]rograms/[Aa]m[Cc]ache.hve",
 	} {

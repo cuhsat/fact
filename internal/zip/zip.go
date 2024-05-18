@@ -5,73 +5,56 @@ import (
 	"archive/zip"
 	"io"
 	"os"
-	"path"
-	"path/filepath"
-	"slices"
 )
 
-func Index(name string) (files []string, err error) {
-	a, err := zip.OpenReader(name)
+type Zip struct {
+	f *os.File
+	w *zip.Writer
+}
+
+func NewZip(name, meta string) (z *Zip, err error) {
+	z = &Zip{}
+
+	z.f, err = os.Create(name)
 
 	if err != nil {
 		return
 	}
 
-	defer a.Close()
+	z.w = zip.NewWriter(z.f)
 
-	for _, f := range a.File {
-		if !f.FileInfo().IsDir() {
-			files = append(files, filepath.ToSlash(f.Name))
-		}
-	}
-
-	slices.Sort(files)
+	err = z.w.SetComment(meta)
 
 	return
 }
 
-func Unzip(name, dir string) (err error) {
-	a, err := zip.OpenReader(name)
+func (z *Zip) Write(src, dst string) (err error) {
+	s, err := os.Open(src)
 
 	if err != nil {
 		return
 	}
 
-	defer a.Close()
+	defer s.Close()
 
-	for _, f := range a.File {
-		file := path.Join(dir, f.Name)
+	d, err := z.w.Create(dst)
 
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(file, os.ModePerm)
-			continue
-		}
+	if err != nil {
+		return
+	}
 
-		if err = os.MkdirAll(path.Dir(file), os.ModePerm); err != nil {
-			return err
-		}
+	_, err = io.Copy(d, s)
 
-		src, err := f.Open()
+	return
+}
 
-		if err != nil {
-			return err
-		}
+func (z *Zip) Close() (err error) {
+	if err = z.w.Close(); err != nil {
+		return
+	}
 
-		dst, err := os.OpenFile(file, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-
-		if err != nil {
-			src.Close()
-			return err
-		}
-
-		_, err = io.Copy(dst, src)
-
-		dst.Close()
-		src.Close()
-
-		if err != nil {
-			return err
-		}
+	if err = z.f.Close(); err != nil {
+		return
 	}
 
 	return

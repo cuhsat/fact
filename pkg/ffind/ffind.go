@@ -14,7 +14,9 @@ import (
 )
 
 const (
-	rLimit = 1024
+	liveZip = "fact"
+	liveExt = ".zip"
+	rLimit  = 1024
 )
 
 type ffind struct {
@@ -143,13 +145,12 @@ func (ff *ffind) live() {
 	host, err := os.Hostname()
 
 	if err != nil {
-		host = "fact" // fallback
 		sys.Error(err)
+
+		host = liveZip // fallback
 	}
 
-	ff.archive = host + ".zip"
-	ff.algo = hash.SHA256
-	// TODO: add file for hash output
+	ff.archive = host + liveExt
 }
 
 func (ff *ffind) path(f string) string {

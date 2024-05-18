@@ -40,7 +40,7 @@ func Find(sysroot, archive, algo string, rp, so, uo bool) (lines []string) {
 		uo:      uo,
 	}
 
-	// Go into live mode?
+	// Go into live mode
 	if len(ff.sysroot)+len(ff.archive)+len(ff.algo) == 0 {
 		ff.live()
 	}
@@ -98,8 +98,10 @@ func (ff *ffind) zip(in <-chan string, out chan<- string) {
 
 	for artifact := range in {
 		if len(ff.archive) > 0 {
-			if z == nil {
-				z, err = zip.NewZip(ff.archive, time.Now().Format(time.RFC3339))
+			if z == nil { // init once
+				meta := time.Now().Format(time.RFC3339)
+
+				z, err = zip.NewZip(ff.archive, meta)
 
 				if err != nil {
 					sys.Fatal(err)

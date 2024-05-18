@@ -5,7 +5,6 @@ import (
 	"archive/zip"
 	"io"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 )
@@ -21,7 +20,7 @@ func Index(name string) (files []string, err error) {
 
 	for _, f := range a.File {
 		if !f.FileInfo().IsDir() {
-			files = append(files, filepath.ToSlash(f.Name))
+			files = append(files, f.Name)
 		}
 	}
 
@@ -40,14 +39,14 @@ func Unzip(name, dir string) (err error) {
 	defer a.Close()
 
 	for _, f := range a.File {
-		file := path.Join(dir, filepath.ToSlash(f.Name))
+		file := filepath.Join(dir, f.Name)
 
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(file, os.ModePerm)
 			continue
 		}
 
-		if err = os.MkdirAll(path.Dir(file), os.ModePerm); err != nil {
+		if err = os.MkdirAll(filepath.Dir(file), os.ModePerm); err != nil {
 			return err
 		}
 

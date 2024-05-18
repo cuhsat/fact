@@ -3,7 +3,6 @@ package windows
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/cuhsat/fact/internal/sys"
@@ -14,7 +13,7 @@ func EnumUsers(sysroot string, out chan<- string) {
 		sysroot = os.ExpandEnv("$HOMEDRIVE")
 	}
 
-	root := path.Join(filepath.ToSlash(sysroot), "Users")
+	root := filepath.Join(sysroot, "Users")
 
 	if _, err := os.Stat(root); err != nil {
 		sys.Error(err)
@@ -52,7 +51,7 @@ func EnumUsers(sysroot string, out chan<- string) {
 			"[Aa]pp[Dd]ata/[Rr]oaming/*/*/[Pp]rofiles/*/places.sqlite",
 			"[Aa]pp[Dd]ata/[Rr]oaming/*/*/*/[Hh]istory",
 		} {
-			files, err := filepath.Glob(path.Join(root, fi.Name(), artifact))
+			files, err := filepath.Glob(filepath.Join(root, fi.Name(), artifact))
 
 			if err != nil {
 				sys.Error(err)

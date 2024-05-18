@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -43,7 +42,7 @@ func Extract(img string) (p string, err error) {
 
 	dir := filepath.Dir(img)
 
-	p = path.Join(dir, i[0])
+	p = filepath.Join(dir, i[0])
 
 	if _, err = os.Stat(p); !os.IsNotExist(err) {
 		err = errors.New("file already exists")

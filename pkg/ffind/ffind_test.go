@@ -3,7 +3,6 @@ package ffind
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 	"reflect"
 	"slices"
@@ -15,8 +14,8 @@ import (
 
 var (
 	tmp, _  = os.MkdirTemp(os.TempDir(), "ffind")
-	archive = path.Join(filepath.ToSlash(tmp), "archive.zip")
-	sysroot = path.Join(filepath.ToSlash(tmp), "sysroot")
+	archive = filepath.Join(tmp, "archive.zip")
+	sysroot = filepath.Join(tmp, "sysroot")
 )
 
 func TestFind(t *testing.T) {

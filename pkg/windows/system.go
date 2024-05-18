@@ -3,7 +3,6 @@ package windows
 
 import (
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/cuhsat/fact/internal/sys"
@@ -14,7 +13,7 @@ func EnumSystem(sysroot string, out chan<- string) {
 		sysroot = os.ExpandEnv("$SYSTEMDRIVE")
 	}
 
-	root := path.Join(filepath.ToSlash(sysroot), "Windows")
+	root := filepath.Join(sysroot, "Windows")
 
 	if _, err := os.Stat(root); err != nil {
 		sys.Error(err)
@@ -31,7 +30,7 @@ func EnumSystem(sysroot string, out chan<- string) {
 		"[Pp]refetch/*.pf",
 		"[Aa]m[Cc]ompat/[Pp]rograms/[Aa]m[Cc]ache.hve",
 	} {
-		files, err := filepath.Glob(path.Join(root, artifact))
+		files, err := filepath.Glob(filepath.Join(root, artifact))
 
 		if err != nil {
 			sys.Error(err)

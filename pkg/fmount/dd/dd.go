@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -49,14 +48,14 @@ func Mount(img, dir string, so bool) (sysroot string, err error) {
 	}
 
 	for i, l := range ls[1:] {
-		p := path.Join(dir, fmt.Sprintf("p%d", i+1))
+		p := filepath.Join(dir, fmt.Sprintf("p%d", i+1))
 
 		if err := os.MkdirAll(p, mode); err != nil {
 			sys.Error(err)
 			continue
 		}
 
-		d := path.Join("/dev", l)
+		d := filepath.Join("/dev", l)
 
 		sp, err := detectMagic(d)
 
@@ -121,7 +120,7 @@ func Unmount(img string) (err error) {
 		}
 
 		for _, d := range ls[1:] {
-			if err = umount(path.Join("/dev", d)); err != nil {
+			if err = umount(filepath.Join("/dev", d)); err != nil {
 				sys.Error(err)
 				continue
 			}

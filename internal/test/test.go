@@ -2,7 +2,7 @@
 package test
 
 import (
-	"path"
+	"path/filepath"
 	"runtime"
 )
 
@@ -13,5 +13,5 @@ func Testdata(name string) string {
 		return "error"
 	}
 
-	return path.Join(path.Dir(c), "..", "testdata", name)
+	return filepath.Join(filepath.Dir(c), "..", "testdata", name)
 }

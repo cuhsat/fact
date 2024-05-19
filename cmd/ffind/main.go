@@ -28,7 +28,7 @@
 // The arguments are:
 //
 //	 mount
-//		The systems root path or image mount point.
+//		The image mount point(s) or the system root path(s).
 //		Defaults to STDIN, then %SYSTEMDRIVE% if not given.
 package main
 

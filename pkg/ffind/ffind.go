@@ -153,6 +153,7 @@ func (ff *ffind) live() {
 	}
 
 	ff.archive = host + liveExt
+	ff.rp = true
 }
 
 func (ff *ffind) path(f string) string {

@@ -21,7 +21,7 @@ func Is(img string) (is bool, err error) {
 	return detectMagic(img)
 }
 
-func Mount(img, dir string, so bool) (sysroot string, err error) {
+func Mount(img, dir string, so bool) (parts []string, err error) {
 	if len(dir) == 0 {
 		dir = baseFile(img)
 	}
@@ -48,13 +48,6 @@ func Mount(img, dir string, so bool) (sysroot string, err error) {
 	}
 
 	for i, l := range ls[1:] {
-		p := filepath.Join(dir, fmt.Sprintf("p%d", i+1))
-
-		if err := os.MkdirAll(p, mode); err != nil {
-			sys.Error(err)
-			continue
-		}
-
 		d := filepath.Join("/dev", l)
 
 		sp, err := detectMagic(d)
@@ -65,18 +58,26 @@ func Mount(img, dir string, so bool) (sysroot string, err error) {
 		}
 
 		if !so || (so && sp) {
+			p := filepath.Join(dir, fmt.Sprintf("p%d", i+1))
+
+			if err := os.MkdirAll(p, mode); err != nil {
+				sys.Error(err)
+				continue
+			}
+
 			if mount(d, p) != nil {
 				sys.Error(err)
 				continue
 			}
-		}
 
-		if sp {
-			sysroot, err = filepath.Abs(p)
+			p, err = filepath.Abs(p)
 
 			if err != nil {
 				sys.Error(err)
+				continue
 			}
+
+			parts = append(parts, p)
 		}
 	}
 

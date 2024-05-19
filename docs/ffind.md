@@ -2,7 +2,7 @@
 Find forensic artifacts in a mount point or on the live system.
 
 ```sh
-$ ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [SYSROOT]
+$ ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]
 ```
 
 Available options:

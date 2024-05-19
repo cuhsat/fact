@@ -39,8 +39,20 @@ func TestDD(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if p != filepath.Join(mnt, "p1") {
-				t.Fatal("sysroot unexpected", p)
+			if len(p) != 1 {
+				t.Fatal("partition count differs")
+			}
+
+			sys := filepath.Join(mnt, "p1")
+
+			if p[0] != sys {
+				t.Fatal("mount point does not exist")
+			}
+
+			dir, _ := os.ReadDir(sys)
+
+			if len(dir) == 0 {
+				t.Fatal("mount point is empty")
 			}
 
 			err = Unmount(img)

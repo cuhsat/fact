@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [SYSROOT]
+//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]
 //
 // The flags are:
 //
@@ -27,7 +27,7 @@
 //
 // The arguments are:
 //
-//	 sysroot
+//	 mount
 //		The systems root path or image mount point.
 //		Defaults to STDIN, then %SYSTEMDRIVE% if not given.
 package main
@@ -60,31 +60,50 @@ func main() {
 	flag.CommandLine.SetOutput(io.Discard)
 	flag.Parse()
 
+	mnt := sys.Args()
+
 	if *h {
-		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [SYSROOT]")
+		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]")
 	}
 
 	if *v {
 		sys.Print("ffind", Version)
 	}
 
-	if *q && len(*Z) == 0 {
-		sys.Fatal("archive name required")
+	if *q && len(*F)+len(*Z) == 0 {
+		sys.Fatal("archive or file required")
 	}
 
-	files := ffind.Find(sys.Param(), *Z, *H, *r, *s, *u)
+	if *r && len(mnt) > 1 {
+		sys.Error("relative paths disabled")
+		*r = false
+	}
 
-	if len(*F) > 0 {
-		b := []byte(strings.Join(files, "\n"))
+	for _, p := range mnt {
+		files := ffind.Find(p, *Z, *H, *r, *s, *u)
 
-		if err := os.WriteFile(*F, b, 0666); err != nil {
-			sys.Error(err)
+		if len(*F) > 0 {
+			f, err := os.OpenFile(*F, os.O_WRONLY|os.O_CREATE, 0666)
+
+			if err != nil {
+				sys.Error(err)
+			}
+
+			b := []byte(strings.Join(files, "\n"))
+
+			if _, err = f.Write(b); err != nil {
+				sys.Error(err)
+			}
+
+			if err = f.Close(); err != nil {
+				sys.Error(err)
+			}
 		}
-	}
 
-	if !*q {
-		for _, f := range files {
-			fmt.Fprintln(os.Stdout, f)
+		if !*q {
+			for _, f := range files {
+				fmt.Fprintln(os.Stdout, f)
+			}
 		}
 	}
 }

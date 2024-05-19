@@ -30,8 +30,8 @@ func Usage(u string) {
 	os.Exit(2)
 }
 
-func Param() (p string) {
-	l := Params()
+func Arg() (p string) {
+	l := Args()
 
 	if len(l) > 0 {
 		p = l[0]
@@ -40,7 +40,7 @@ func Param() (p string) {
 	return
 }
 
-func Params() []string {
+func Args() []string {
 	if flag.NArg() > 0 {
 		return flag.Args()
 	}

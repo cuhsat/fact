@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cuhsat/fact/internal/hash"
+	"github.com/cuhsat/fact/internal/fact/hash"
+	"github.com/cuhsat/fact/internal/fact/zip"
 	"github.com/cuhsat/fact/internal/sys"
-	"github.com/cuhsat/fact/internal/zip"
 	"github.com/cuhsat/fact/pkg/fmount/dd"
 )
 

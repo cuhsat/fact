@@ -8,8 +8,8 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/cuhsat/fact/internal/fact/zip"
 	"github.com/cuhsat/fact/internal/test"
-	"github.com/cuhsat/fact/internal/zip"
 )
 
 var (
@@ -40,7 +40,7 @@ func TestFind(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			c := Find(sysroot, archive, "", true, false, false)
+			c := Find(sysroot, archive, "", "", true, false, false)
 
 			b, err := zip.Index(archive)
 
@@ -71,7 +71,7 @@ func BenchmarkFind(b *testing.B) {
 		b.ResetTimer()
 
 		for n := 0; n < b.N; n++ {
-			Find(sysroot, "", "", true, false, false)
+			Find(sysroot, "", "", "", true, false, false)
 		}
 
 		b.StopTimer()

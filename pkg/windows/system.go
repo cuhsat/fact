@@ -20,6 +20,7 @@ func EnumSystem(sysroot string, out chan<- string) {
 	}
 
 	for _, artifact := range [...]string{
+		"[Nn][Tt][Dd][Ss]/[Nn][Tt][Dd][Ss].[Dd][Ii][Tt]",
 		"[Ss]ystem32/[Cc]onfig/[Cc][Oo][Mm][Pp][Oo][Nn][Ee][Nn][Tt][Ss]",
 		"[Ss]ystem32/[Cc]onfig/[Dd][Ee][Ff][Aa][Uu][Ll][Tt]",
 		"[Ss]ystem32/[Cc]onfig/[Ss][Aa][Mm]",

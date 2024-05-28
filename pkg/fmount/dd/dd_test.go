@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/cuhsat/fact/internal/fact/zip"
 	"github.com/cuhsat/fact/internal/test"
-	"github.com/cuhsat/fact/internal/zip"
 )
 
 func TestDD(t *testing.T) {

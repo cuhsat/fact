@@ -1,15 +1,15 @@
 # ffind
-Find forensic artifacts in a mount point or on the live system.
+Find forensic artifacts in mount points or on the live system.
 
 ```sh
-$ ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]
+$ ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]
 ```
 
 Available options:
 
 - `-H` Hash algorithm
 - `-Z` Archive name
-- `-F` File to write
+- `-L` Listing name
 - `-r` Relative paths
 - `-s` System artifacts only
 - `-u` User artifacts only

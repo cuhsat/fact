@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 GO="go"
 GOFLAGS="build -race"
-GOBIN="../bin"
+GOBIN="bin"
 VERSION=$(git describe --tags --abbrev=0)
+LDFLAGS="-X 'github.com/cuhsat/fact/internal/fact.Version=$VERSION'"
 
 mkdir -p ${GOBIN}
 
-echo "Building version ${VERSION}"
+echo "Build ${VERSION}"
 
-for DIR in ../cmd/*/ ; do
-    TOOL=$(basename $DIR)
+for DIR in cmd/*/ ; do
+    BIN=$(basename $DIR)
 
-    echo "$TOOL"
+    echo "  $BIN"
 
-    ${GO} ${GOFLAGS} -ldflags="-X '$DIR/main.Version=${VERSION}'" -o ${GOBIN}/$TOOL $DIR/main.go
+    ${GO} ${GOFLAGS} -ldflags "$LDFLAGS" -o ${GOBIN}/$BIN $DIR/main.go
 done

@@ -11,9 +11,19 @@ import (
 	"strings"
 )
 
+const (
+	EX_OK       = 0
+	EX_ERROR    = 1
+	EX_USAGE    = 2
+	EX_DATAERR  = 3
+	EX_NOINPUT  = 4
+	EX_NOTEXEC  = 126
+	EX_NOTFOUND = 127
+)
+
 func Print(a ...any) {
 	fmt.Fprintln(os.Stdout, a...)
-	os.Exit(0)
+	os.Exit(EX_OK)
 }
 
 func Error(err ...any) {
@@ -22,12 +32,12 @@ func Error(err ...any) {
 
 func Fatal(err ...any) {
 	fmt.Fprintln(os.Stderr, err...)
-	os.Exit(1)
+	os.Exit(EX_ERROR)
 }
 
 func Usage(u string) {
 	fmt.Fprintln(os.Stdout, "usage:", u)
-	os.Exit(2)
+	os.Exit(EX_USAGE)
 }
 
 func Arg() (p string) {
@@ -45,24 +55,33 @@ func Args() []string {
 		return flag.Args()
 	}
 
-	stdin, err := Stdin()
+	stdin, err, code := Stdin()
 
 	if err != nil {
-		Fatal(err)
+		Error(err)
+		os.Exit(code)
 	}
 
 	return strings.Split(stdin, "\n")
 }
 
-func Stdin() (in string, err error) {
+func Stdin() (in string, err error, code int) {
 	fi, err := os.Stdin.Stat()
 
 	if err != nil {
+		code = EX_NOINPUT
 		return
 	}
 
 	if (fi.Mode() & os.ModeCharDevice) == 0 {
-		b, _ := io.ReadAll(os.Stdin)
+		var b []byte
+
+		b, err = io.ReadAll(os.Stdin)
+
+		if err != nil {
+			code = EX_DATAERR
+			return
+		}
 
 		in = strings.TrimSpace(string(b))
 	}
@@ -70,30 +89,30 @@ func Stdin() (in string, err error) {
 	return
 }
 
-func StdCall(name string, arg ...string) (string, error) {
+func StdCall(name string, args ...string) (string, error) {
 	stdout := new(strings.Builder)
 	stderr := new(strings.Builder)
 
-	if call(stdout, stderr, name, arg...) != 0 {
+	if call(stdout, stderr, name, args...) != 0 {
 		return stdout.String(), errors.New(stderr.String())
 	}
 
 	return stdout.String(), nil
 }
 
-func ExitCall(name string, arg ...string) {
-	os.Exit(call(os.Stdout, os.Stderr, name, arg...))
+func ExitCall(name string, args ...string) {
+	os.Exit(call(os.Stdout, os.Stderr, name, args...))
 }
 
-func call(stdout, stderr io.Writer, name string, arg ...string) int {
+func call(stdout, stderr io.Writer, name string, args ...string) int {
 	bin, err := exec.LookPath(name)
 
 	if err != nil {
 		Error(err)
-		return 1
+		return EX_NOTFOUND
 	}
 
-	cmd := exec.Command(bin, arg...)
+	cmd := exec.Command(bin, args...)
 
 	cmd.Stdout = stdout
 	cmd.Stderr = stderr
@@ -103,8 +122,8 @@ func call(stdout, stderr io.Writer, name string, arg ...string) int {
 	if ee, ok := err.(*exec.ExitError); ok {
 		return ee.ExitCode()
 	} else if err != nil {
-		return 1
+		return EX_NOTEXEC
 	} else {
-		return 0
+		return EX_OK
 	}
 }

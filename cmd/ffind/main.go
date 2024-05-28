@@ -1,8 +1,8 @@
-// Find forensic artifacts in a mount point or on the live system.
+// Find forensic artifacts in mount points or on the live system.
 //
 // Usage:
 //
-//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]
+//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]
 //
 // The flags are:
 //
@@ -10,8 +10,8 @@
 //	 	The hash algorithm to use.
 //	 -Z archive
 //		The artifacts archive name.
-//	 -F file
-//		The filename to write also.
+//	 -L file
+//		The artifacts listing name.
 //	 -r
 //		Output relative paths.
 //	 -s
@@ -37,19 +37,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
 
+	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/ffind"
 )
 
-// Changed by ldflags
-var Version string = "dev"
-
 func main() {
 	H := flag.String("H", "", "Hash algorithm")
 	Z := flag.String("Z", "", "Archive name")
-	F := flag.String("F", "", "File to write")
+	L := flag.String("L", "", "Listing name")
 	r := flag.Bool("r", false, "Relative paths")
 	s := flag.Bool("s", false, "System artifacts only")
 	u := flag.Bool("u", false, "User artifacts only")
@@ -63,15 +60,15 @@ func main() {
 	mnt := sys.Args()
 
 	if *h {
-		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-F FILE] [MOUNT ...]")
+		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]")
 	}
 
 	if *v {
-		sys.Print("ffind", Version)
+		sys.Print("ffind", fact.Version)
 	}
 
-	if *q && len(*F)+len(*Z) == 0 {
-		sys.Fatal("archive or file required")
+	if *q && len(*Z)+len(*L) == 0 {
+		sys.Fatal("archive or listing required")
 	}
 
 	if *r && len(mnt) > 1 {
@@ -80,25 +77,7 @@ func main() {
 	}
 
 	for _, p := range mnt {
-		files := ffind.Find(p, *Z, *H, *r, *s, *u)
-
-		if len(*F) > 0 {
-			f, err := os.OpenFile(*F, os.O_WRONLY|os.O_CREATE, 0666)
-
-			if err != nil {
-				sys.Error(err)
-			}
-
-			b := []byte(strings.Join(files, "\n"))
-
-			if _, err = f.Write(b); err != nil {
-				sys.Error(err)
-			}
-
-			if err = f.Close(); err != nil {
-				sys.Error(err)
-			}
-		}
+		files := ffind.Find(p, *Z, *L, *H, *r, *s, *u)
 
 		if !*q {
 			for _, f := range files {

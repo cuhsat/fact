@@ -2,13 +2,15 @@
 Forensic Artifacts Collecting Toolkit.
 
 ```sh
-$ fmount -T dd image.dd | ffind -H sha256 -Z artifacts.zip
+# fmount image.dd | ffind | flog
 ```
 
 ## Tools
 - [fmount](docs/fmount.md)
 - [fmount.dd](docs/fmount.dd.md)
 - [ffind](docs/ffind.md)
+- [flog](docs/flog.md)
+- [flog.evt](docs/flog.evt.md)
 
 ## License
 Released under the [MIT License](LICENSE).

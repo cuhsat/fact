@@ -23,6 +23,6 @@ go.work
 # Fact files
 bin/
 *.dd
+*.evtx
 *.zip
-!internal/testdata/windows.zip
-!internal/testdata/windows.dd.zip
+!internal/testdata/windows*.zip

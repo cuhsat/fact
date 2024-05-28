@@ -35,13 +35,11 @@ import (
 	"flag"
 	"io"
 
+	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/fmount"
 	"github.com/cuhsat/fact/pkg/fmount/dd"
 )
-
-// Changed by ldflags
-var Version string = "dev"
 
 func main() {
 	D := flag.String("D", "", "Mount point")
@@ -60,7 +58,7 @@ func main() {
 	img := sys.Arg()
 
 	if *v {
-		sys.Print("fmount", Version)
+		sys.Print("fmount", fact.Version)
 	}
 
 	if *h || len(img) == 0 {

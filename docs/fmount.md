@@ -2,7 +2,7 @@
 Mount forensic disk images for read-only processing.
 
 ```sh
-$ fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
+# fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
 ```
 
 Available options:

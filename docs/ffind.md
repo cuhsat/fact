@@ -19,6 +19,7 @@ Available options:
 
 Supported artifacts for Windows 7+ systems:
 
+- [System Active Directory](https://forensics.wiki/active_directory/)
 - [System Registry Hives](https://forensics.wiki/windows_registry/)
 - [System Prefetch Files](https://forensics.wiki/prefetch/)
 - [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)

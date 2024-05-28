@@ -15,7 +15,7 @@ Required system commands:
 
 - [dotnet](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
 
-> Run `scripts/eztools.sh` to install [Eric Zimmerman's Tools](https://ericzimmerman.github.io/#!index.md).
+> Use `scripts/eztools.sh` to install [Eric Zimmerman's Tools](https://ericzimmerman.github.io/#!index.md).
 
 ---
 Part of the [Forensic Artifacts Collecting Toolkit](../README.md).

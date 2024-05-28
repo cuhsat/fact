@@ -1,5 +1,5 @@
 # flog
-Log forensics artifacts in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) schema.
+Log forensic artifacts in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) schema.
 
 ```sh
 $ flog [-hv] [-D DIRECTORY] [FILE ...]

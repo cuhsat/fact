@@ -17,7 +17,7 @@ const (
 	Evtx = "evtx"
 )
 
-func Log(src string, dir string) (err error) {
+func Log(src string, dir string) (logs []string, err error) {
 	lines, err := _import(src, dir)
 
 	if err != nil {
@@ -35,9 +35,18 @@ func Log(src string, dir string) (err error) {
 			sys.Error(err)
 			continue
 		}
+
+		l, err := filepath.Abs(dst)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		logs = append(logs, l)
 	}
 
-	return nil
+	return logs, nil
 }
 
 func _import(src, dir string) (lines []string, err error) {

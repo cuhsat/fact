@@ -18,13 +18,12 @@ func TestMain(m *testing.M) {
 
 func TestLog(t *testing.T) {
 	cases := []struct {
-		name, file, evtx, json string
+		name, file, evtx string
 	}{
 		{
 			name: "Test log for Windows",
 			file: test.Testdata("windows", "event.zip"),
 			evtx: "System.evtx",
-			json: "System_00000000.json",
 		},
 	}
 
@@ -40,23 +39,17 @@ func TestLog(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			evt := filepath.Join(tmp, tt.evtx)
 
-			err := Log(evt, tmp)
+			l, err := Log(evt, tmp)
 
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			f, err := files(tmp)
-
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if len(f) != 2 {
+			if len(l) != 1 {
 				t.Fatal("file count differs")
 			}
 
-			b, err := os.ReadFile(filepath.Join(tmp, tt.json))
+			b, err := os.ReadFile(l[0])
 
 			if err != nil {
 				t.Fatal(err)
@@ -67,20 +60,4 @@ func TestLog(t *testing.T) {
 			}
 		})
 	}
-}
-
-func files(dir string) (f []string, err error) {
-	de, err := os.ReadDir(dir)
-
-	if err != nil {
-		return
-	}
-
-	for _, e := range de {
-		if !e.IsDir() {
-			f = append(f, e.Name())
-		}
-	}
-
-	return
 }

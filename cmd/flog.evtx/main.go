@@ -23,6 +23,7 @@ package main
 import (
 	"flag"
 	"io"
+	"strings"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
@@ -52,8 +53,14 @@ func main() {
 	g := new(errgroup.Group)
 
 	for _, f := range files {
-		g.Go(func() error {
-			return evtx.Log(f, *D)
+		g.Go(func() (err error) {
+			l, err := evtx.Log(f, *D)
+
+			if err == nil {
+				sys.Print(strings.Join(l, "\n"))
+			}
+
+			return
 		})
 	}
 

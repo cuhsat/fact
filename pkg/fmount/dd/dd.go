@@ -81,7 +81,7 @@ func Mount(img, dir string, so bool) (parts []string, err error) {
 		}
 	}
 
-	return
+	return parts, nil
 }
 
 func Unmount(img string) (err error) {
@@ -123,7 +123,6 @@ func Unmount(img string) (err error) {
 		for _, d := range ls[1:] {
 			if err = umount(filepath.Join("/dev", d)); err != nil {
 				sys.Error(err)
-				continue
 			}
 		}
 
@@ -146,7 +145,7 @@ func Unmount(img string) (err error) {
 		}
 	}
 
-	return
+	return nil
 }
 
 func baseFile(name string) string {

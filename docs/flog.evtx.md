@@ -1,5 +1,5 @@
 # flog.evtx
-Log Windows event log artifacts in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) schema.
+Log [Windows event logs](https://forensics.wiki/windows_event_log_%28evt%29/) as JSON in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html).
 
 ```sh
 $ flog.evtx [-hv] [-D DIRECTORY] [FILE ...]

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/cuhsat/fact/internal/fact"
+	"github.com/cuhsat/fact/internal/fact/ez"
 	"github.com/cuhsat/fact/internal/flog"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/ecs"
@@ -85,7 +85,7 @@ func _export(src, dst, line string) (err error) {
 }
 
 func evtxecmd(src, dst, dir string) (log string, err error) {
-	asm, err := fact.EzTools("EvtxECmd.dll")
+	asm, err := ez.Path("EvtxECmd.dll")
 
 	if err != nil {
 		return

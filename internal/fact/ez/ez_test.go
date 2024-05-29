@@ -1,12 +1,17 @@
-// Fact 3rd party tests.
-package fact
+// Fact ez tests.
+package ez
 
 import (
 	"os"
 	"testing"
 )
 
-func TestTools(t *testing.T) {
+func TestMain(m *testing.M) {
+	os.Setenv("EZTOOLS", "../../bin")
+	os.Exit(m.Run())
+}
+
+func TestPath(t *testing.T) {
 	cases := []struct {
 		name, tool string
 	}{
@@ -16,11 +21,9 @@ func TestTools(t *testing.T) {
 		},
 	}
 
-	os.Setenv("EZTOOLS", "../../bin")
-
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := EzTools(tt.tool)
+			p, err := Path(tt.tool)
 
 			if err != nil {
 				t.Fatal(err)

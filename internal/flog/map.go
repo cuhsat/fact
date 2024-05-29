@@ -29,7 +29,9 @@ type object any
 func NewMap(s string) (m *Map, err error) {
 	m = &Map{}
 
-	return m, json.Unmarshal(bytes.TrimPrefix([]byte(s), bom), &m.o)
+	b := bytes.TrimPrefix([]byte(s), bom)
+
+	return m, json.Unmarshal(b, &m.o)
 }
 
 func (m *Map) GetString(key string) (value string) {

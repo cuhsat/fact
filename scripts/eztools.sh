@@ -6,7 +6,7 @@ mkdir -p ${GOBIN}
 echo "Download tools"
 
 if [ ! -f ${GOBIN}/EvtxECmd.dll ] ; then
-    echo "  EvtxECmd"
+    echo "    EvtxECmd"
 
     wget -q "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip" -O ${GOBIN}/evtx.zip
     unzip -q ${GOBIN}/evtx.zip -d ${GOBIN}

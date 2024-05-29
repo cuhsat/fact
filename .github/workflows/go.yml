@@ -21,12 +21,10 @@ jobs:
         go-version: "1.22"
 
     - name: Tools
-      run: make tools GOBIN=${{ env.EZTOOLS }}
+      run: make tools BIN=${{ env.EZTOOLS }}
 
     - name: Build
       run: go build -v -race ./...
 
     - name: Test
-      run: |
-        ls -lha ${{ env.EZTOOLS }}
-        go test -exec sudo -v -race ./...
+      run: go test -exec sudo -v -race ./...

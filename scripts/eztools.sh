@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-GOBIN="bin"
+BIN="bin"
 
-mkdir -p ${GOBIN}
+mkdir -p ${BIN}
 
 echo "Download tools"
 
-if [ ! -f ${GOBIN}/EvtxECmd.dll ] ; then
+if [ ! -f ${BIN}/EvtxECmd.dll ] ; then
     echo "    EvtxECmd"
 
-    wget -q "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip" -O ${GOBIN}/evtx.zip
-    unzip -q ${GOBIN}/evtx.zip -d ${GOBIN}
+    wget -q "https://f001.backblazeb2.com/file/EricZimmermanTools/net6/EvtxECmd.zip" -O ${BIN}/evtx.zip
+    unzip -q ${BIN}/evtx.zip -d ${BIN}
 
-    cp ${GOBIN}/EvtxeCmd/EvtxECmd.dll ${GOBIN}
-    cp ${GOBIN}/EvtxeCmd/EvtxECmd.runtimeconfig.json ${GOBIN}
-    cp -r ${GOBIN}/EvtxeCmd/Maps ${GOBIN}
+    cp ${BIN}/EvtxeCmd/EvtxECmd.dll ${BIN}
+    cp ${BIN}/EvtxeCmd/EvtxECmd.runtimeconfig.json ${BIN}
+    cp -r ${BIN}/EvtxeCmd/Maps ${BIN}
 
-    rm -rf ${GOBIN}/EvtxeCmd*
-    rm -f ${GOBIN}/evtx.zip
+    rm -rf ${BIN}/EvtxeCmd*
+    rm -f ${BIN}/evtx.zip
 fi
 
-export EZTOOLS=$(realpath ${GOBIN})
+export EZTOOLS=$(realpath ${BIN})

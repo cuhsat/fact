@@ -7,6 +7,8 @@ import (
 )
 
 func TestTools(t *testing.T) {
+	os.Setenv("EZTOOLS", "../../bin")
+
 	cases := []struct {
 		name, tool string
 	}{

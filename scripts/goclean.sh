@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
+BIN="bin"
 GO="go"
-GOBIN="bin"
 GOFLAGS="clean"
 
-rm -rf ${GOBIN}
+rm -rf ${BIN}
 ${GO} ${GOFLAGS}

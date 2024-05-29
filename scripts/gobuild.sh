@@ -12,7 +12,7 @@ echo "Build ${VERSION}"
 for DIR in cmd/*/ ; do
     CMD=$(basename ${DIR})
 
-    echo "    ${CMD}"
+    echo "--- ${CMD}"
 
     ${GO} ${GOFLAGS} -ldflags "${LDFLAGS}" -o ${BIN}/${CMD} ${DIR}/main.go
 done

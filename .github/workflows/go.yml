@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 env:
-  EZTOOLS: ${{ github.workspace }}/bin
+  BIN: ${{ github.workspace }}/bin
 
 jobs:
   build:
@@ -21,7 +21,7 @@ jobs:
         go-version: "1.22"
 
     - name: Tools
-      run: make tools BIN=${{ env.EZTOOLS }}
+      run: make tools BIN=${{ env.BIN }}
 
     - name: Build
       run: go build -v -race ./...

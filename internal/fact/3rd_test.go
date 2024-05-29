@@ -7,8 +7,6 @@ import (
 )
 
 func TestTools(t *testing.T) {
-	os.Setenv("EZTOOLS", "../../bin")
-
 	cases := []struct {
 		name, tool string
 	}{
@@ -17,6 +15,8 @@ func TestTools(t *testing.T) {
 			tool: "EvtxECmd.dll",
 		},
 	}
+
+	os.Setenv("EZTOOLS", "../../bin")
 
 	for _, tt := range cases {
 		t.Run(tt.name, func(t *testing.T) {

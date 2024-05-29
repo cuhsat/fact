@@ -28,5 +28,5 @@ jobs:
 
     - name: Test
       run: |
-        echo ${{ env.EZTOOLS }}
+        ls -lha ${{ env.EZTOOLS }}
         go test -exec sudo -v -race ./...

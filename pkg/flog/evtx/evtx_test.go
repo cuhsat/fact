@@ -11,6 +11,11 @@ import (
 	"github.com/cuhsat/fact/internal/test"
 )
 
+func TestMain(m *testing.M) {
+	os.Setenv("EZTOOLS", "../../../bin")
+	os.Exit(m.Run())
+}
+
 func TestLog(t *testing.T) {
 	cases := []struct {
 		name, file, evtx, json string

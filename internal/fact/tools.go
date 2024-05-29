@@ -1,4 +1,4 @@
-// FACT 3rd party functions.
+// Fact implementation details.
 package fact
 
 import (

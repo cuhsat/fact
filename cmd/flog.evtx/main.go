@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	flog [-hv] [-D DIRECTORY] [FILE ...]
+//	flog.evtx [-hv] [-D DIRECTORY] [FILE ...]
 //
 // The flags are:
 //
@@ -27,7 +27,7 @@ import (
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/flog"
-	"github.com/cuhsat/fact/pkg/flog/evt"
+	"github.com/cuhsat/fact/pkg/flog/evtx"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -42,18 +42,18 @@ func main() {
 	files := flog.StripHash(sys.Args())
 
 	if *v {
-		sys.Print("flog", fact.Version)
+		sys.Print("flog.evtx", fact.Version)
 	}
 
 	if *h || len(files) == 0 {
-		sys.Usage("flog [-hv] [-D DIRECTORY] [FILE ...]")
+		sys.Usage("flog.evtx [-hv] [-D DIRECTORY] [FILE ...]")
 	}
 
 	g := new(errgroup.Group)
 
 	for _, f := range files {
 		g.Go(func() error {
-			return evt.Log(f, *D)
+			return evtx.Log(f, *D)
 		})
 	}
 

@@ -22,7 +22,11 @@ go.work
 
 # Fact files
 bin/
+
 *.dd
 *.evtx
 *.zip
+
+!cmd/*
+!pkg/*
 !internal/testdata/windows*.zip

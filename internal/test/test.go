@@ -6,12 +6,14 @@ import (
 	"runtime"
 )
 
-func Testdata(name string) string {
+func Testdata(args ...string) string {
 	_, c, _, ok := runtime.Caller(0)
 
 	if !ok {
 		return "error"
 	}
 
-	return filepath.Join(filepath.Dir(c), "..", "testdata", name)
+	p := []string{filepath.Dir(c), "..", "testdata"}
+
+	return filepath.Join(append(p, args...)...)
 }

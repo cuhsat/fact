@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 GO="go"
-GOFLAGS="build -race"
+GOFLAGS="build -v -race"
 GOBIN="bin"
 VERSION=$(git describe --tags --abbrev=0)
 LDFLAGS="-X 'github.com/cuhsat/fact/internal/fact.Version=$VERSION'"

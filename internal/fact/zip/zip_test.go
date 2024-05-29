@@ -12,7 +12,7 @@ import (
 
 func TestIndex(t *testing.T) {
 	t.Run("Test index", func(t *testing.T) {
-		idx, err := Index(test.Testdata("windows.zip"))
+		idx, err := Index(test.Testdata("windows", "image.zip"))
 
 		if err != nil {
 			t.Fatal(err)
@@ -28,7 +28,7 @@ func TestUnzip(t *testing.T) {
 	t.Run("Test unzip", func(t *testing.T) {
 		tmp, _ := os.MkdirTemp(os.TempDir(), "zip")
 
-		err := Unzip(test.Testdata("windows.zip"), tmp)
+		err := Unzip(test.Testdata("windows", "image.zip"), tmp)
 
 		if err != nil {
 			t.Fatal(err)

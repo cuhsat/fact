@@ -13,7 +13,7 @@ Available options:
 
 Supported artifacts for Windows 7+ systems:
 
-- [System Event Logs](flog.evt.md)
+- [System Event Logs](flog.evtx.md)
 
 ---
 Part of the [Forensic Artifacts Collecting Toolkit](../README.md).

@@ -1,4 +1,4 @@
-// FACT definitions.
+// Fact definitions.
 package fact
 
 // Set at compile time

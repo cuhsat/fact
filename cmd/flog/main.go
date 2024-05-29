@@ -57,7 +57,7 @@ func main() {
 	g := new(errgroup.Group)
 
 	g.Go(func() error {
-		return flog.Evt(files, args)
+		return flog.Evtx(files, args)
 	})
 
 	if err := g.Wait(); err != nil {

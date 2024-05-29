@@ -10,7 +10,7 @@ Forensic Artifacts Collecting Toolkit.
 - [fmount.dd](docs/fmount.dd.md)
 - [ffind](docs/ffind.md)
 - [flog](docs/flog.md)
-- [flog.evt](docs/flog.evt.md)
+- [flog.evtx](docs/flog.evtx.md)
 
 ## License
 Released under the [MIT License](LICENSE).

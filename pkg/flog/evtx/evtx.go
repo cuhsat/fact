@@ -1,5 +1,5 @@
-// Evt implementation details.
-package evt
+// Evtx implementation details.
+package evtx
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	Evt = "evtx"
+	Evtx = "evtx"
 )
 
 func Log(src string, dir string) (err error) {

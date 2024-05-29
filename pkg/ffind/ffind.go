@@ -54,7 +54,7 @@ func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
 	}
 
 	var ch [4]chan string
-	var cn = 0
+	var ci = 0
 
 	for i := range ch {
 		ch[i] = make(chan string, rLimit)
@@ -63,14 +63,14 @@ func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
 	add := func(fn fstep) {
 		ff.wg.Add(1)
 
-		go fn(ch[cn], ch[cn+1])
+		go fn(ch[ci], ch[ci+1])
 
-		cn++
+		ci++
 	}
 
 	ff.wg.Add(1)
 
-	go ff.enum(ch[cn])
+	go ff.enum(ch[ci])
 
 	if len(ff.arc) > 0 {
 		add(ff.comp)
@@ -84,12 +84,16 @@ func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
 		add(ff.hash)
 	}
 
-	for l := range ch[cn] {
+	for f := range ch[ci] {
 		if len(ff.ha) == 0 {
-			l = ff.path(l)
+			f = ff.path(f)
 		}
 
-		files = append(files, l)
+		if sys.Progress != nil {
+			sys.Progress(f)
+		}
+
+		files = append(files, f)
 	}
 
 	ff.wg.Wait()

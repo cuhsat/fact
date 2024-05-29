@@ -39,7 +39,7 @@ func TestLog(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			evt := filepath.Join(tmp, tt.evtx)
 
-			l, err := Log(evt, tmp)
+			l, err := Log(evt, tmp, true)
 
 			if err != nil {
 				t.Fatal(err)

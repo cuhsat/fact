@@ -2,12 +2,14 @@
 Log forensic artifacts as JSON in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html).
 
 ```sh
-$ flog [-hv] [-D DIRECTORY] [FILE ...]
+$ flog [-pqhv] [-D DIRECTORY] [FILE ...]
 ```
 
 Available options:
 
 - `-D` Log directory
+- `-p` Pretty JSON
+- `-q` Quiet mode
 - `-h` Show usage
 - `-v` Show version
 

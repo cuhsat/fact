@@ -21,17 +21,27 @@ const (
 	EX_NOTFOUND = 127
 )
 
+var (
+	Progress Any = Print
+)
+
+type Any func(a ...any)
+
 func Print(a ...any) {
+	fmt.Fprintln(os.Stdout, a...)
+}
+
+func Error(a ...any) {
+	fmt.Fprintln(os.Stderr, a...)
+}
+
+func Final(a ...any) {
 	fmt.Fprintln(os.Stdout, a...)
 	os.Exit(EX_OK)
 }
 
-func Error(err ...any) {
-	fmt.Fprintln(os.Stderr, err...)
-}
-
-func Fatal(err ...any) {
-	fmt.Fprintln(os.Stderr, err...)
+func Fatal(a ...any) {
+	fmt.Fprintln(os.Stderr, a...)
 	os.Exit(EX_ERROR)
 }
 

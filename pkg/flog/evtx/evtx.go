@@ -17,7 +17,7 @@ const (
 	Evtx = "evtx"
 )
 
-func Log(src string, dir string) (logs []string, err error) {
+func Log(src, dir string, pty bool) (logs []string, err error) {
 	lines, err := _import(src, dir)
 
 	if err != nil {
@@ -31,7 +31,7 @@ func Log(src string, dir string) (logs []string, err error) {
 	for i, line := range lines {
 		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
 
-		if err = _export(src, dst, line); err != nil {
+		if err = _export(src, dst, line, pty); err != nil {
 			sys.Error(err)
 			continue
 		}
@@ -41,6 +41,10 @@ func Log(src string, dir string) (logs []string, err error) {
 		if err != nil {
 			sys.Error(err)
 			continue
+		}
+
+		if sys.Progress != nil {
+			sys.Progress(l)
 		}
 
 		logs = append(logs, l)
@@ -67,14 +71,14 @@ func _import(src, dir string) (lines []string, err error) {
 	return
 }
 
-func _export(src, dst, line string) (err error) {
+func _export(src, dst, line string, pty bool) (err error) {
 	e, err := ecs.MapEvent(line, src)
 
 	if err != nil {
 		return
 	}
 
-	b, err := e.Bytes()
+	b, err := e.Bytes(pty)
 
 	if err != nil {
 		return

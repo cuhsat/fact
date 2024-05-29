@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount.dd [-fsuzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE
+//	fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE
 //
 // The flags are:
 //
@@ -20,6 +20,8 @@
 //		Unmount image.
 //	 -z
 //		Unzip image.
+//	 -q
+//		Quiet mode.
 //	 -h
 //		Show usage.
 //	 -v
@@ -34,7 +36,6 @@ package main
 import (
 	"flag"
 	"io"
-	"strings"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
@@ -50,6 +51,7 @@ func main() {
 	s := flag.Bool("s", false, "System partition only")
 	u := flag.Bool("u", false, "Unmount image")
 	z := flag.Bool("z", false, "Unzip image")
+	q := flag.Bool("q", false, "Quiet mode")
 	h := flag.Bool("h", false, "Show usage")
 	v := flag.Bool("v", false, "Show version")
 
@@ -59,11 +61,15 @@ func main() {
 	img := sys.Arg()
 
 	if *v {
-		sys.Print("fmount.dd", fact.Version)
+		sys.Final("fmount.dd", fact.Version)
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount.dd [-fsuzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE")
+	}
+
+	if *q {
+		sys.Progress = nil
 	}
 
 	if *z {
@@ -109,11 +115,9 @@ func main() {
 		return
 	}
 
-	p, err := dd.Mount(img, *D, *s)
+	_, err := dd.Mount(img, *D, *s)
 
 	if err != nil {
 		sys.Fatal(err)
 	}
-
-	sys.Print(strings.Join(p, "\n"))
 }

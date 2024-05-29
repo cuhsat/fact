@@ -77,6 +77,10 @@ func Mount(img, dir string, so bool) (parts []string, err error) {
 				continue
 			}
 
+			if sys.Progress != nil {
+				sys.Progress(p)
+			}
+
 			parts = append(parts, p)
 		}
 	}

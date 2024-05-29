@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
+//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
 //
 // The flags are:
 //
@@ -20,6 +20,8 @@
 //		Unmount image.
 //	 -z
 //		Unzip image.
+//	 -q
+//		Quiet mode.
 //	 -h
 //		Show usage.
 //	 -v
@@ -49,6 +51,7 @@ func main() {
 	s := flag.Bool("s", false, "System partition only")
 	u := flag.Bool("u", false, "Unmount image")
 	z := flag.Bool("z", false, "Unzip image")
+	q := flag.Bool("q", false, "Quiet mode")
 	h := flag.Bool("h", false, "Show usage")
 	v := flag.Bool("v", false, "Show version")
 
@@ -58,11 +61,11 @@ func main() {
 	img := sys.Arg()
 
 	if *v {
-		sys.Print("fmount", fact.Version)
+		sys.Final("fmount", fact.Version)
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE")
 	}
 
 	it, err := fmount.DetectType(img, *T)
@@ -95,6 +98,10 @@ func main() {
 
 	if *z {
 		args = append(args, "-z")
+	}
+
+	if *q {
+		args = append(args, "-q")
 	}
 
 	args = append(args, img)

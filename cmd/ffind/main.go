@@ -34,9 +34,7 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"io"
-	"os"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
@@ -59,12 +57,16 @@ func main() {
 
 	mnt := sys.Args()
 
+	if *v {
+		sys.Final("ffind", fact.Version)
+	}
+
 	if *h {
 		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]")
 	}
 
-	if *v {
-		sys.Print("ffind", fact.Version)
+	if *q {
+		sys.Progress = nil
 	}
 
 	if *q && len(*Z)+len(*L) == 0 {
@@ -77,12 +79,6 @@ func main() {
 	}
 
 	for _, p := range mnt {
-		files := ffind.Find(p, *Z, *L, *H, *r, *s, *u)
-
-		if !*q {
-			for _, f := range files {
-				fmt.Fprintln(os.Stdout, f)
-			}
-		}
+		ffind.Find(p, *Z, *L, *H, *r, *s, *u)
 	}
 }

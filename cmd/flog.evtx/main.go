@@ -1,13 +1,17 @@
-// Log Windows event logs information in ECS schema.
+// Log Windows event logs as JSON in ECS.
 //
 // Usage:
 //
-//	flog.evtx [-hv] [-D DIRECTORY] [FILE ...]
+//	flog.evtx [-pqhv] [-D DIRECTORY] [FILE ...]
 //
 // The flags are:
 //
 //	 -D directory
 //	    The log directory.
+//	 -p
+//		Pretty JSON.
+//	 -q
+//		Quiet mode.
 //	 -h
 //		Show usage.
 //	 -v
@@ -23,7 +27,6 @@ package main
 import (
 	"flag"
 	"io"
-	"strings"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
@@ -34,6 +37,8 @@ import (
 
 func main() {
 	D := flag.String("D", "", "Log directory")
+	p := flag.Bool("p", false, "Pretty JSON")
+	q := flag.Bool("q", false, "Quiet mode")
 	h := flag.Bool("h", false, "Show usage")
 	v := flag.Bool("v", false, "Show version")
 
@@ -43,23 +48,22 @@ func main() {
 	files := flog.StripHash(sys.Args())
 
 	if *v {
-		sys.Print("flog.evtx", fact.Version)
+		sys.Final("flog.evtx", fact.Version)
 	}
 
 	if *h || len(files) == 0 {
-		sys.Usage("flog.evtx [-hv] [-D DIRECTORY] [FILE ...]")
+		sys.Usage("flog.evtx [-pqhv] [-D DIRECTORY] [FILE ...]")
+	}
+
+	if *q {
+		sys.Progress = nil
 	}
 
 	g := new(errgroup.Group)
 
 	for _, f := range files {
 		g.Go(func() (err error) {
-			l, err := evtx.Log(f, *D)
-
-			if err == nil {
-				sys.Print(strings.Join(l, "\n"))
-			}
-
+			_, err = evtx.Log(f, *D, *p)
 			return
 		})
 	}

@@ -22,8 +22,12 @@ type Event struct {
 	Process Process
 }
 
-func (e *Event) Bytes() (b []byte, err error) {
-	return json.Marshal(e)
+func (e *Event) Bytes(pty bool) (b []byte, err error) {
+	if pty {
+		return json.MarshalIndent(e, "", "  ")
+	} else {
+		return json.Marshal(e)
+	}
 }
 
 func MapEvent(log, src string) (e *Event, err error) {

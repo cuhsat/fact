@@ -1,13 +1,17 @@
-// Log forensic artifacts information in ECS schema.
+// Log forensic artifacts as JSON in ECS.
 //
 // Usage:
 //
-//	flog [-hv] [-D DIRECTORY] [FILE ...]
+//	flog [-pqhv] [-D DIRECTORY] [FILE ...]
 //
 // The flags are:
 //
 //	 -D directory
 //	    The log directory.
+//	 -p
+//		Pretty JSON.
+//	 -q
+//		Quiet mode.
 //	 -h
 //		Show usage.
 //	 -v
@@ -32,6 +36,8 @@ import (
 
 func main() {
 	D := flag.String("D", "", "Log directory")
+	p := flag.Bool("p", false, "Pretty JSON")
+	q := flag.Bool("q", false, "Quiet mode")
 	h := flag.Bool("h", false, "Show usage")
 	v := flag.Bool("v", false, "Show version")
 
@@ -41,17 +47,25 @@ func main() {
 	files := flog.StripHash(sys.Args())
 
 	if *v {
-		sys.Print("flog", fact.Version)
+		sys.Final("flog", fact.Version)
 	}
 
 	if *h || len(files) == 0 {
-		sys.Usage("flog [-hv] [-D DIRECTORY] [FILE ...]")
+		sys.Usage("flog [-pqhv] [-D DIRECTORY] [FILE ...]")
 	}
 
 	args := make([]string, 0)
 
 	if len(*D) > 0 {
 		args = append(args, "-D", *D)
+	}
+
+	if *p {
+		args = append(args, "-p")
+	}
+
+	if *q {
+		args = append(args, "-q")
 	}
 
 	g := new(errgroup.Group)

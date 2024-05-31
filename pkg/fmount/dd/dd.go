@@ -6,71 +6,131 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/cuhsat/fact/internal/fmount"
 	"github.com/cuhsat/fact/internal/sys"
 )
 
 const (
-	DD   = "dd"
-	RAW  = "raw"
-	mode = 0444
+	DD  = "dd"
+	RAW = "raw"
 )
 
 func Is(img string) (is bool, err error) {
 	return detectMagic(img)
 }
 
-func Mount(img, dir string, so bool) (parts []string, err error) {
-	if len(dir) == 0 {
-		dir = baseFile(img)
-	}
+func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 
-	if err = os.MkdirAll(dir, mode); err != nil {
+	// create symlink directory
+	if err = os.MkdirAll(fmount.SymlinkPath, sys.MODE_DIR); err != nil {
 		return
 	}
 
-	lo, err := losetupAttach(img)
+	// create mount point
+	if len(mnt) == 0 {
+		mnt = fmount.BaseFile(img)
+	}
+
+	if err = os.MkdirAll(mnt, sys.MODE_DIR); err != nil {
+		return
+	}
+
+	// attach image as loop device
+	loi, err := fmount.LoSetupAttach(img)
 
 	if err != nil {
 		return
 	}
 
-	ls, err := lsblk(lo, "name")
+	// get partition loop devices
+	lops, err := fmount.LsBlk(loi, "name")
 
 	if err != nil {
 		return
 	}
 
-	if len(ls) <= 1 {
+	if len(lops) <= 1 {
 		err = errors.New("no partitions found")
 		return
 	}
 
-	for i, l := range ls[1:] {
-		d := filepath.Join("/dev", l)
+	// handle found partition loop devices (but skipping root)
+	for i, lop := range lops[1:] {
+		dev := toDev(lop)
 
-		sp, err := detectMagic(d)
+		// check if partition loop device is bootable
+		sp, err := detectMagic(dev)
 
 		if err != nil {
 			sys.Error(err)
 			continue
 		}
 
+		// if all or bootable
 		if !so || (so && sp) {
-			p := filepath.Join(dir, fmt.Sprintf("p%d", i+1))
 
-			if err := os.MkdirAll(p, mode); err != nil {
+			// create partition mount point
+			mntp := filepath.Join(mnt, fmt.Sprintf("p%d", i+1))
+
+			if err := os.MkdirAll(mntp, sys.MODE_DIR); err != nil {
 				sys.Error(err)
 				continue
 			}
 
-			if mount(d, p) != nil {
+			// check if partition loop device is encrypted
+			is, err := fmount.IsEncrypted(dev)
+
+			if err != nil {
 				sys.Error(err)
 				continue
 			}
 
-			p, err = filepath.Abs(p)
+			if is && len(key) == 0 {
+				sys.Error("no key given")
+				continue
+			}
+
+			// if encrypted
+			if is {
+
+				// create fuse mount point
+				mntf := filepath.Join(mnt, fmt.Sprintf("p%d-fuse", i+1))
+
+				if err = os.MkdirAll(mntf, sys.MODE_DIR); err != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// mount to be decrypted partition loop device as fuse
+				err := fmount.DislockerFuse(dev, key, mntf)
+
+				if err != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// create symlink to track device relations
+				src := filepath.Join(mntf, fmount.DislockerDev)
+				lnk := filepath.Join(fmount.SymlinkPath, lop)
+
+				if err = os.Symlink(src, lnk); err != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// overwrite device to be mounted
+				dev = filepath.Join(mntf, fmount.DislockerDev)
+			}
+
+			// mount device
+			if fmount.Mount(dev, mntp, is) != nil {
+				sys.Error(err)
+				continue
+			}
+
+			// report progress
+			mntp, err = filepath.Abs(mntp)
 
 			if err != nil {
 				sys.Error(err)
@@ -78,10 +138,10 @@ func Mount(img, dir string, so bool) (parts []string, err error) {
 			}
 
 			if sys.Progress != nil {
-				sys.Progress(p)
+				sys.Progress(mntp)
 			}
 
-			parts = append(parts, p)
+			parts = append(parts, mntp)
 		}
 	}
 
@@ -95,67 +155,125 @@ func Unmount(img string) (err error) {
 		return
 	}
 
-	lo, err := losetupList(img)
+	// get loop devices associated with image
+	lois, err := fmount.LoSetupList(img)
 
 	if err != nil {
 		return
 	}
 
-	if len(lo) == 0 {
+	if len(lois) == 0 {
 		return errors.New("no devices found")
 	}
 
-	for _, l := range lo {
-		ls, err := lsblk(l, "name")
+	// handle found loop devices
+	for _, loi := range lois {
+
+		// get partition loop devices
+		lops, err := fmount.LsBlk(loi, "name")
 
 		if err != nil {
 			sys.Error(err)
 			continue
 		}
 
-		if len(ls) <= 1 {
-			return errors.New("no partitions found")
+		if len(lops) <= 1 {
+			sys.Error("no partitions found")
+			continue
 		}
 
-		mp, err := lsblk(l, "mountpoints")
+		// get mount points of partition loop device
+		mnts, err := fmount.LsBlk(loi, "mountpoints")
 
 		if err != nil {
 			sys.Error(err)
 			continue
 		}
 
-		for _, d := range ls[1:] {
-			if err = umount(filepath.Join("/dev", d)); err != nil {
+		// handle found loop devices (but skipping root)
+		for _, lop := range lops[1:] {
+			dev := toDev(lop)
+
+			// check if partition loop device is encrypted
+			is, err := fmount.IsEncrypted(dev)
+
+			if err != nil {
 				sys.Error(err)
+				continue
 			}
-		}
 
-		if losetupDetach(l) != nil {
-			sys.Error(err)
-			continue
-		}
+			// if encrypted
+			if is {
 
-		for _, p := range mp {
-			if _, err := os.Stat(p); !os.IsNotExist(err) {
-				if err = os.Remove(p); err != nil {
+				// get symlink to fuse device for partition loop device
+				lnk := filepath.Join(fmount.SymlinkPath, lop)
+
+				if _, err := os.Stat(lnk); os.IsNotExist(err) {
+					sys.Error("fmount symlink not found")
+					continue
+				}
+
+				// get partition mount points from symlink
+				src, err := filepath.EvalSymlinks(lnk)
+
+				if err != nil {
 					sys.Error(err)
 					continue
 				}
 
-				if err = os.Remove(filepath.Dir(p)); err != nil {
+				mntf := filepath.Dir(src)
+				mntp := toDir(src)
+
+				mnts = append(mnts, mntp)
+
+				// unmount partition mount point
+				if err = fmount.UmountDir(mntp); err != nil {
 					sys.Error(err)
+					continue
 				}
+
+				// unmount fuse mount point
+				if err = fmount.UmountDir(mntf); err != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// detach partitionloop device
+				if fmount.LoSetupDetach(lop) != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// remove symlink
+				if err = os.Remove(lnk); err != nil {
+					sys.Error(err)
+					continue
+				}
+			} else {
+
+				// unmount partition loop device
+				if err = fmount.UmountDev(dev); err != nil {
+					sys.Error(err)
+					continue
+				}
+			}
+		}
+
+		// detach loop device
+		fmount.LoSetupDetach(loi)
+
+		// remove empty mount points
+		for _, mnt := range mnts {
+			err = fmount.RemoveDirs(filepath.Dir(mnt))
+
+			if err != nil {
+				sys.Error(err)
+				continue
 			}
 		}
 	}
 
 	return nil
-}
-
-func baseFile(name string) string {
-	b := filepath.Base(name)
-
-	return strings.TrimSuffix(b, filepath.Ext(b))
 }
 
 func detectMagic(name string) (has bool, err error) {
@@ -183,50 +301,10 @@ func detectMagic(name string) (has bool, err error) {
 	return s[0x1FE] == 0x55 && s[0x1FF] == 0xAA, nil
 }
 
-func losetupAttach(img string) (dev string, err error) {
-	dev, err = sys.StdCall("losetup", "-Pfr", "--show", img)
-
-	return
+func toDev(lo string) (dev string) {
+	return filepath.Join("/dev", lo)
 }
 
-func losetupDetach(dev string) (err error) {
-	_, err = sys.StdCall("losetup", "-d", dev)
-
-	return
-}
-
-func losetupList(img string) (l []string, err error) {
-	lo, err := sys.StdCall("losetup", "-l", "-n", "-O", "name", "-j", img)
-
-	if err != nil {
-		return
-	}
-
-	l = strings.Split(strings.TrimSpace(lo), "\n")
-
-	return
-}
-
-func lsblk(dev, col string) (l []string, err error) {
-	ls, err := sys.StdCall("lsblk", "-l", "-n", "-o", col, strings.TrimSpace(dev))
-
-	if err != nil {
-		return
-	}
-
-	l = strings.Split(strings.TrimSpace(ls), "\n")
-
-	return
-}
-
-func mount(dev, dir string) (err error) {
-	_, err = sys.StdCall("mount", "-o", "ro", dev, dir)
-
-	return
-}
-
-func umount(dev string) (err error) {
-	_, err = sys.StdCall("umount", "-A", dev)
-
-	return
+func toDir(lnk string) (dir string) {
+	return lnk[:len(lnk)-len("-fuse/"+fmount.DislockerDev)]
 }

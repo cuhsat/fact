@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
+//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIRECTORY] IMAGE
 //
 // The flags are:
 //
@@ -10,6 +10,8 @@
 //		The mount point directory.
 //	 -T type
 //	    The disk image type.
+//	 -B key
+//	 	The BitLocker key.
 //	 -H algorithm
 //	 	The hash algorithm to use.
 //	 -V sum
@@ -46,6 +48,7 @@ import (
 func main() {
 	D := flag.String("D", "", "Mount point")
 	T := flag.String("T", "", "Image type")
+	B := flag.String("B", "", "BitLocker key")
 	H := flag.String("H", "", "Hash algorithm")
 	V := flag.String("V", "", "Hash sum")
 	s := flag.Bool("s", false, "System partition only")
@@ -65,7 +68,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIRECTORY] IMAGE")
 	}
 
 	it, err := fmount.DetectType(img, *T)
@@ -78,6 +81,10 @@ func main() {
 
 	if len(*D) > 0 {
 		args = append(args, "-D", *D)
+	}
+
+	if len(*B) > 0 {
+		args = append(args, "-B", *B)
 	}
 
 	if len(*H) > 0 {

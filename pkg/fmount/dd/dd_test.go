@@ -33,7 +33,7 @@ func TestDD(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			img := filepath.Join(tmp, baseFile(tt.file))
 
-			p, err := Mount(img, mnt, true)
+			p, err := Mount(img, mnt, "", true)
 
 			if err != nil {
 				t.Fatal(err)

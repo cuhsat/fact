@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -19,6 +20,12 @@ const (
 	EX_NOINPUT  = 4
 	EX_NOTEXEC  = 126
 	EX_NOTFOUND = 127
+)
+
+const (
+	MODE_ALL  = 0777
+	MODE_DIR  = 0755
+	MODE_FILE = 0644
 )
 
 var (
@@ -46,8 +53,16 @@ func Fatal(a ...any) {
 }
 
 func Usage(u string) {
-	fmt.Fprintln(os.Stdout, "usage:", u)
+	fmt.Fprintln(os.Stdout, "Usage:", u)
 	os.Exit(EX_USAGE)
+}
+
+func Debug(d string) {
+	_, f, no, ok := runtime.Caller(1)
+
+	if ok {
+		fmt.Fprintf(os.Stdout, "%s:%d %s\n", f, no, d)
+	}
 }
 
 func Arg() (p string) {

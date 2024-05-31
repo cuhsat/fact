@@ -2,12 +2,14 @@
 //
 // Usage:
 //
-//	fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE
+//	fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIRECTORY] IMAGE
 //
 // The flags are:
 //
 //	 -D directory
 //		The mount point directory.
+//	 -B key
+//	 	The BitLocker key.
 //	 -H algorithm
 //	 	The hash algorithm to use.
 //	 -V sum
@@ -45,6 +47,7 @@ import (
 
 func main() {
 	D := flag.String("D", "", "Mount point")
+	B := flag.String("B", "", "BitLocker key")
 	H := flag.String("H", "", "Hash algorithm")
 	V := flag.String("V", "", "Hash sum")
 	f := flag.Bool("f", false, "Force mounting")
@@ -65,7 +68,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount.dd [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIRECTORY] IMAGE")
 	}
 
 	if *q {
@@ -110,12 +113,13 @@ func main() {
 		}
 	}
 
-	if *u {
-		dd.Unmount(img)
-		return
-	}
+	var err error
 
-	_, err := dd.Mount(img, *D, *s)
+	if *u {
+		err = dd.Unmount(img)
+	} else {
+		_, err = dd.Mount(img, *D, *B, *s)
+	}
 
 	if err != nil {
 		sys.Fatal(err)

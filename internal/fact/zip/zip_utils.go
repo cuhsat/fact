@@ -7,6 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+
+	"github.com/cuhsat/fact/internal/sys"
 )
 
 func Index(name string) (files []string, err error) {
@@ -42,11 +44,11 @@ func Unzip(name, dir string) (err error) {
 		file := filepath.Join(dir, f.Name)
 
 		if f.FileInfo().IsDir() {
-			os.MkdirAll(file, os.ModePerm)
+			os.MkdirAll(file, sys.MODE_ALL)
 			continue
 		}
 
-		if err = os.MkdirAll(filepath.Dir(file), os.ModePerm); err != nil {
+		if err = os.MkdirAll(filepath.Dir(file), sys.MODE_ALL); err != nil {
 			return err
 		}
 

@@ -2,13 +2,14 @@
 Mount forensic disk images for read-only processing.
 
 ```sh
-# fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-T RAW|DD] [-D DIRECTORY] IMAGE
+# fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIRECTORY] IMAGE
 ```
 
 Available options:
 
 - `-D` Mount point
 - `-T` Image type
+- `-B` BitLocker key
 - `-H` Hash algorithm
 - `-V` Verify hash sum
 - `-s` System partition only

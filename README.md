@@ -8,6 +8,7 @@ Forensic Artifacts Collecting Toolkit.
 ## Tools
 - [fmount](docs/fmount.md)
 - [fmount.dd](docs/fmount.dd.md)
+- [fkey](docs/fkey.md)
 - [ffind](docs/ffind.md)
 - [flog](docs/flog.md)
 - [flog.evtx](docs/flog.evtx.md)

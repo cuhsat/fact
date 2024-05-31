@@ -206,7 +206,7 @@ func Unmount(img string) (err error) {
 					continue
 				}
 
-				// detach partitionloop device
+				// detach partition loop device
 				if err = fmount.LoSetupDetach(lop); err != nil {
 					sys.Error(err)
 					continue

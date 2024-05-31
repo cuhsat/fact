@@ -11,7 +11,7 @@ const (
 	DislockerDev = "dislocker-file"
 )
 
-func DislockerInfo(dev string) (g []string, err error) {
+func DislockerInfo(dev string) (ids []string, err error) {
 	md, err := sys.StdCall("dislocker-metadata", "-V", dev)
 
 	if err != nil {
@@ -24,7 +24,7 @@ func DislockerInfo(dev string) (g []string, err error) {
 		i := strings.Index(s, "Recovery Key GUID")
 
 		if i >= 0 {
-			g = append(g, s[i+20:i+56])
+			ids = append(ids, s[i+20:i+56])
 		}
 	}
 

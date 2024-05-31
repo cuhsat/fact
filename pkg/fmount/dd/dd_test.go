@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/cuhsat/fact/internal/fact/zip"
+	"github.com/cuhsat/fact/internal/fmount"
 	"github.com/cuhsat/fact/internal/test"
 )
 
@@ -31,7 +32,7 @@ func TestDD(t *testing.T) {
 		}
 
 		t.Run(tt.name, func(t *testing.T) {
-			img := filepath.Join(tmp, baseFile(tt.file))
+			img := filepath.Join(tmp, fmount.BaseFile(tt.file))
 
 			p, err := Mount(img, mnt, "", true)
 

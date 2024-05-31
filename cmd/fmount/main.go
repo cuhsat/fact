@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIRECTORY] IMAGE
+//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIR] IMAGE
 //
 // The flags are:
 //
@@ -68,7 +68,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIRECTORY] IMAGE")
+		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIR] IMAGE")
 	}
 
 	it, err := fmount.DetectType(img, *T)

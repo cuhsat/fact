@@ -1,4 +1,4 @@
-// Shows all Recovery Key GUIDs of an image.
+// Shows all BitLocker Recovery Key IDs of an image.
 //
 // Usage:
 //
@@ -44,7 +44,7 @@ func main() {
 		sys.Usage("fkey [-hv] IMAGE")
 	}
 
-	ids, err := fkey.RecoveryIds(img)
+	ids, err := fkey.RecoveryKeyIds(img)
 
 	if err != nil {
 		sys.Fatal(err)

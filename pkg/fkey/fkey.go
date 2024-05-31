@@ -6,7 +6,7 @@ import (
 	"github.com/cuhsat/fact/internal/sys"
 )
 
-func RecoveryIds(img string) (ids []string, err error) {
+func RecoveryKeyIds(img string) (ids []string, err error) {
 	loi, err := fmount.LoSetupAttach(img)
 
 	if err != nil {

@@ -1,5 +1,5 @@
 # fkey
-Shows all Recovery Key GUIDs of an image.
+Shows all [BitLocker Recovery Key IDs](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/recovery-overview) of an image.
 
 ```sh
 # fkey [-hv] IMAGE

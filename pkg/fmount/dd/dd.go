@@ -213,7 +213,7 @@ func Unmount(img string) (err error) {
 				}
 
 				// remove symlink
-				if err = fmount.RemoveSymlink(dev); err != nil {
+				if err = fmount.RemoveSymlink(lop); err != nil {
 					sys.Error(err)
 					continue
 				}

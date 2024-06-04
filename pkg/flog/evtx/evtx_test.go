@@ -22,7 +22,7 @@ func TestLog(t *testing.T) {
 	}{
 		{
 			name: "Test log for Windows",
-			file: test.Testdata("windows", "event.zip"),
+			file: test.Testdata("windows", "evtx.zip"),
 			evtx: "System.evtx",
 		},
 	}

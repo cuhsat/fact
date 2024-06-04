@@ -14,7 +14,7 @@ import (
 
 var (
 	tmp, _  = os.MkdirTemp(os.TempDir(), "ffind")
-	archive = filepath.Join(tmp, "artifacts.zip")
+	archive = filepath.Join(tmp, "ffind.zip")
 	sysroot = filepath.Join(tmp, "sysroot")
 )
 
@@ -24,7 +24,7 @@ func TestFind(t *testing.T) {
 	}{
 		{
 			name: "Test find for Windows",
-			file: test.Testdata("windows", "image.zip"),
+			file: test.Testdata("windows", "root.zip"),
 		},
 	}
 
@@ -40,7 +40,7 @@ func TestFind(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			c := Find(sysroot, archive, "", "", true, false, false)
+			c := Find(sysroot, archive, "", "", true, false, false, false)
 
 			b, err := zip.Index(archive)
 
@@ -62,7 +62,7 @@ func TestFind(t *testing.T) {
 
 func BenchmarkFind(b *testing.B) {
 	b.Run("Benchmark find", func(b *testing.B) {
-		file := test.Testdata("windows", "image.zip")
+		file := test.Testdata("windows", "root.zip")
 
 		if err := zip.Unzip(file, sysroot); err != nil {
 			b.Fatal(err)
@@ -71,7 +71,7 @@ func BenchmarkFind(b *testing.B) {
 		b.ResetTimer()
 
 		for n := 0; n < b.N; n++ {
-			Find(sysroot, "", "", "", true, false, false)
+			Find(sysroot, "", "", "", true, false, false, false)
 		}
 
 		b.StopTimer()

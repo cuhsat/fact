@@ -6,20 +6,22 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 	"time"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/fact/hash"
 	"github.com/cuhsat/fact/internal/fact/zip"
+	vsc "github.com/cuhsat/fact/internal/ffind"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/windows"
 )
 
 const (
-	fallback = "fact"
-	extZip   = ".zip"
-	extTxt   = ".txt"
+	fallback = "ffind"
+	zipExt   = ".zip"
+	csvExt   = ".csv"
 	rLimit   = 1024
 )
 
@@ -27,30 +29,34 @@ type ffind struct {
 	wg sync.WaitGroup
 
 	root string
-	arc  string
-	lst  string
-	ha   string
+	zip  string
+	csv  string
+	hsh  string
 	rp   bool
+	sc   bool
 	so   bool
 	uo   bool
 }
 
 type fstep func(in <-chan string, out chan<- string)
 
-func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
+func Find(root, zip, csv, hsh string, rp, sc, so, uo bool) (files []string) {
 	ff := &ffind{
 		root: root,
-		arc:  arc,
-		lst:  lst,
-		ha:   ha,
+		zip:  zip,
+		csv:  csv,
+		hsh:  hsh,
 		rp:   rp,
+		sc:   sc,
 		so:   so,
 		uo:   uo,
 	}
 
 	// Switch to live mode
-	if len(ff.root)+len(ff.arc)+len(ff.ha) == 0 {
-		ff.live()
+	if len(ff.root)+len(ff.zip)+len(ff.csv)+len(ff.hsh) == 0 {
+		if runtime.GOOS == "windows" {
+			ff.live()
+		}
 	}
 
 	var ch [4]chan string
@@ -72,20 +78,20 @@ func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
 
 	go ff.enum(ch[ci])
 
-	if len(ff.arc) > 0 {
+	if len(ff.zip) > 0 {
 		add(ff.comp)
 	}
 
-	if len(ff.lst) > 0 {
+	if len(ff.csv) > 0 {
 		add(ff.list)
 	}
 
-	if len(ff.ha) > 0 {
+	if len(ff.hsh) > 0 {
 		add(ff.hash)
 	}
 
 	for f := range ch[ci] {
-		if len(ff.ha) == 0 {
+		if len(ff.hsh) == 0 {
 			f = ff.path(f)
 		}
 
@@ -104,6 +110,16 @@ func Find(root, arc, lst, ha string, rp, so, uo bool) (files []string) {
 func (ff *ffind) enum(out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
+
+	if ff.sc {
+		sc, err := vsc.ShadowCopy(windows.SystemDrive())
+
+		if err != nil {
+			sys.Fatal(err)
+		}
+
+		ff.root = sc
+	}
 
 	if len(ff.root) > 0 {
 		fi, err := os.Stat(ff.root)
@@ -130,7 +146,7 @@ func (ff *ffind) comp(in <-chan string, out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
 
-	z, err := zip.NewZip(ff.arc, time.Now().Format(time.RFC3339))
+	z, err := zip.NewZip(ff.zip, time.Now().Format(time.RFC3339))
 
 	if err != nil {
 		sys.Fatal(err)
@@ -153,7 +169,7 @@ func (ff *ffind) list(in <-chan string, out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
 
-	f, err := os.Create(ff.lst)
+	f, err := os.Create(ff.csv)
 
 	if err != nil {
 		sys.Fatal(err)
@@ -185,7 +201,7 @@ func (ff *ffind) hash(in <-chan string, out chan<- string) {
 	defer ff.wg.Done()
 
 	for artifact := range in {
-		s, err := hash.Sum(artifact, ff.ha)
+		s, err := hash.Sum(artifact, ff.hsh)
 
 		if err != nil {
 			sys.Error(err)
@@ -205,12 +221,11 @@ func (ff *ffind) live() {
 		host = fallback
 	}
 
-	ff.arc = host + extZip
-	ff.lst = host + extTxt
+	ff.zip = host + zipExt
+	ff.csv = host + csvExt
 
 	ff.rp = true
-	ff.so = true
-	ff.uo = true
+	ff.sc = true
 }
 
 func (ff *ffind) path(f string) string {

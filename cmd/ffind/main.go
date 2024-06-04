@@ -2,18 +2,20 @@
 //
 // Usage:
 //
-//	ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]
+//	ffind [-rcsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-C CSV] [-Z ZIP] [MOUNT ...]
 //
 // The flags are:
 //
 //	 -H algorithm
 //	 	The hash algorithm to use.
+//	 -C file
+//		The artifacts csv listing name.
 //	 -Z archive
-//		The artifacts archive name.
-//	 -L file
-//		The artifacts listing name.
+//		The artifacts zip archive name.
 //	 -r
 //		Output relative paths.
+//	 -c
+//		Use volume shadow copy.
 //	 -s
 //		System artifacts only.
 //	 -u
@@ -43,9 +45,10 @@ import (
 
 func main() {
 	H := flag.String("H", "", "Hash algorithm")
-	Z := flag.String("Z", "", "Archive name")
-	L := flag.String("L", "", "Listing name")
+	C := flag.String("C", "", "CSV Listing name")
+	Z := flag.String("Z", "", "Zip archive name")
 	r := flag.Bool("r", false, "Relative paths")
+	c := flag.Bool("c", false, "Volume shadow copy")
 	s := flag.Bool("s", false, "System artifacts only")
 	u := flag.Bool("u", false, "User artifacts only")
 	q := flag.Bool("q", false, "Quiet mode")
@@ -62,15 +65,19 @@ func main() {
 	}
 
 	if *h {
-		sys.Usage("ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]")
+		sys.Usage("ffind [-rcsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-C CSV] [-Z ZIP] [MOUNT ...]")
 	}
 
 	if *q {
 		sys.Progress = nil
 	}
 
-	if *q && len(*Z)+len(*L) == 0 {
+	if *q && len(*Z)+len(*C) == 0 {
 		sys.Fatal("archive or listing required")
+	}
+
+	if *s && *u {
+		sys.Fatal("system or user required")
 	}
 
 	if *r && len(mnt) > 1 {
@@ -79,6 +86,6 @@ func main() {
 	}
 
 	for _, p := range mnt {
-		ffind.Find(p, *Z, *L, *H, *r, *s, *u)
+		ffind.Find(p, *Z, *C, *H, *r, *c, *s, *u)
 	}
 }

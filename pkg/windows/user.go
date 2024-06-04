@@ -8,9 +8,17 @@ import (
 	"github.com/cuhsat/fact/internal/sys"
 )
 
+func UserDrive() string {
+	if env := os.ExpandEnv("$HOMEDRIVE"); len(env) > 0 {
+		return env
+	} else {
+		return "C:"
+	}
+}
+
 func EnumUsers(sysroot string, out chan<- string) {
 	if len(sysroot) == 0 {
-		sysroot = os.ExpandEnv("$HOMEDRIVE")
+		sysroot = UserDrive()
 	}
 
 	root := filepath.Join(sysroot, "Users")

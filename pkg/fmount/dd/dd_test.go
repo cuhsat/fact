@@ -17,7 +17,7 @@ func TestDD(t *testing.T) {
 	}{
 		{
 			name: "Test mount for Windows",
-			file: test.Testdata("windows", "image.dd.zip"),
+			file: test.Testdata("windows", "disk.dd.zip"),
 		},
 	}
 

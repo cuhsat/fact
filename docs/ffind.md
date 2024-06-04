@@ -2,15 +2,16 @@
 Find forensic artifacts in mount points or on the live system.
 
 ```sh
-$ ffind [-rsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-Z ARCHIVE] [-L FILE] [MOUNT ...]
+$ ffind [-rcsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-C CSV] [-Z ZIP] [MOUNT ...]
 ```
 
 Available options:
 
 - `-H` Hash algorithm
-- `-Z` Archive name
-- `-L` Listing name
+- `-C` CSV listing name
+- `-Z` Zip archive name
 - `-r` Relative paths
+- `-c` Volume shadow copy
 - `-s` System artifacts only
 - `-u` User artifacts only
 - `-q` Quiet mode

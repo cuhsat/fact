@@ -8,9 +8,17 @@ import (
 	"github.com/cuhsat/fact/internal/sys"
 )
 
+func SystemDrive() string {
+	if env := os.ExpandEnv("$SYSTEMDRIVE"); len(env) > 0 {
+		return env
+	} else {
+		return "C:"
+	}
+}
+
 func EnumSystem(sysroot string, out chan<- string) {
 	if len(sysroot) == 0 {
-		sysroot = os.ExpandEnv("$SYSTEMDRIVE")
+		sysroot = SystemDrive()
 	}
 
 	root := filepath.Join(sysroot, "Windows")

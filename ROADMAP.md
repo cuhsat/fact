@@ -2,7 +2,7 @@
 
 ## FMount
 - [x] Support for [BitLocker](https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/) partitions
-- [ ] Support for [VMDK](https://github.com/libyal/libvmdk/blob/main/documentation/VMWare%20Virtual%20Disk%20Format%20(VMDK).asciidoc) images
+- [x] Support for [VMDK](https://github.com/libyal/libvmdk/blob/main/documentation/VMWare%20Virtual%20Disk%20Format%20(VMDK).asciidoc) images
 
 
 ## FFind

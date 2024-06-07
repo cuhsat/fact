@@ -2,7 +2,7 @@
 Mount forensic disk images for read-only processing.
 
 ```sh
-# fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD] [-D DIR] IMAGE
+# fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
 ```
 
 Available options:
@@ -21,6 +21,7 @@ Available options:
 
 Supported disk formats:
 
+- [VMDK](https://forensics.wiki/vmware_virtual_disk_format_%28vmdk%29/)
 - [DD (Raw)](https://forensics.wiki/raw_image_format/)
 
 ---

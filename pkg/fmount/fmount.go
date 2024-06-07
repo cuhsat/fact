@@ -12,6 +12,7 @@ import (
 	"github.com/cuhsat/fact/internal/fact/zip"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/fmount/dd"
+	"github.com/cuhsat/fact/pkg/fmount/vmdk"
 )
 
 func DetectType(img, t string) (string, error) {
@@ -21,6 +22,8 @@ func DetectType(img, t string) (string, error) {
 		return strings.ToLower(t), nil
 	} else if len(e) > 0 {
 		return strings.ToLower(e[1:]), nil
+	} else if is, err := vmdk.Is(img); is {
+		return vmdk.VMDK, err
 	} else if is, err := dd.Is(img); is {
 		return dd.RAW, err
 	} else {

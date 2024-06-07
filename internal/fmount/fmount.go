@@ -2,6 +2,7 @@
 package fmount
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -15,8 +16,16 @@ const (
 	SymlinkPath = "/tmp/fmount"
 )
 
+var (
+	MbrMagic = []byte{0x55, 0xAA}
+)
+
 func Dev(loop string) string {
 	return filepath.Join("/dev", loop)
+}
+
+func FromFuse(dev string) string {
+	return dev[:len(dev)-len("-fuse/"+DislockerDev)]
 }
 
 func BaseFile(name string) string {
@@ -25,14 +34,33 @@ func BaseFile(name string) string {
 	return strings.TrimSuffix(b, filepath.Ext(b))
 }
 
-func Loops(img string) (loops []string, err error) {
-	loops, err = LoSetupList(img)
+func BlockDevs(img string) (nbds []string, err error) {
+	dir := filepath.Join(SymlinkPath, filepath.Base(img))
+
+	ff, err := os.ReadDir(dir)
 
 	if err != nil {
 		return
 	}
 
-	if len(loops) == 0 {
+	for _, f := range ff {
+		if f.Type()&os.ModeSymlink != os.ModeSymlink {
+			continue
+		}
+
+		lnk := filepath.Join(dir, f.Name())
+
+		src, err := filepath.EvalSymlinks(lnk)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		nbds = append(nbds, src)
+	}
+
+	if len(nbds) == 0 {
 		err = errors.New("no devices found")
 		return
 	}
@@ -40,25 +68,79 @@ func Loops(img string) (loops []string, err error) {
 	return
 }
 
-func Parts(dev string) (parts []string, err error) {
-	parts, err = LsBlk(dev, "name")
+func LoopDevs(img string) (los []string, err error) {
+	los, err = LoSetupList(img)
 
 	if err != nil {
 		return
 	}
 
-	if len(parts) <= 1 {
+	if len(los) == 0 {
+		err = errors.New("no devices found")
+		return
+	}
+
+	return
+}
+
+func PartDevs(dev string) (ps []string, err error) {
+	ps, err = LsBlk(dev, "name")
+
+	if err != nil {
+		return
+	}
+
+	if len(ps) <= 1 {
 		err = errors.New("no partitions found")
 		return
 	}
 
-	parts = parts[1:] // skip loop root
+	ps = ps[1:] // skip root device
 
 	return
 }
 
 func Mounts(dev string) (mnts []string, err error) {
 	return LsBlk(dev, "mountpoints")
+}
+
+func IsLoaded(mod string) (is bool, err error) {
+	ls, err := ModList(mod)
+
+	for _, l := range ls {
+		if strings.HasPrefix(l, mod+" ") {
+			return true, nil
+		}
+	}
+
+	return
+}
+
+func IsBootable(dev string) (is bool, err error) {
+	f, err := os.Open(dev)
+
+	if err != nil {
+		return
+	}
+
+	defer f.Close()
+
+	b := make([]byte, 512)
+
+	n, err := f.Read(b)
+
+	if err != nil {
+		return
+	}
+
+	if n != len(b) {
+		err = errors.New("could not read sector")
+		return
+	}
+
+	is = bytes.Equal(b[0x1FE:0x200], MbrMagic)
+
+	return
 }
 
 func IsEncrypted(dev string) (is bool, err error) {
@@ -78,7 +160,7 @@ func IsEncrypted(dev string) (is bool, err error) {
 	return
 }
 
-func CreateMount(img, mnt string) error {
+func CreateImageMount(img, mnt string) error {
 	if len(mnt) == 0 {
 		mnt = BaseFile(img)
 	}
@@ -86,9 +168,23 @@ func CreateMount(img, mnt string) error {
 	return os.MkdirAll(mnt, sys.MODE_DIR)
 }
 
+func CreateImageSymlink(img, dev string) (err error) {
+	dir := filepath.Join(SymlinkPath, filepath.Base(img))
+
+	if err = os.MkdirAll(dir, sys.MODE_DIR); err != nil {
+		return
+	}
+
+	lnk := filepath.Join(dir, filepath.Base(dev))
+
+	// TODO: remove symlink if exists?
+
+	return os.Symlink(dev, lnk)
+}
+
 func CreateSymlink(dev, mnt string) error {
-	lnk := filepath.Join(SymlinkPath, dev)
 	src := filepath.Join(mnt, DislockerDev)
+	lnk := filepath.Join(SymlinkPath, dev)
 
 	return os.Symlink(src, lnk)
 }

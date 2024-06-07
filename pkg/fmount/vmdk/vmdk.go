@@ -1,7 +1,10 @@
-// DD implementation details.
-package dd
+// VMDK implementation details.
+package vmdk
 
 import (
+	"bytes"
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,16 +13,36 @@ import (
 )
 
 const (
-	DD  = "dd"
-	RAW = "raw"
+	VMDK = "vmdk"
 )
 
 var (
-	vbrMagic = []byte{0x55, 0xAA}
+	header = []byte{0x4B, 0x44, 0x4D, 0x56}
 )
 
 func Is(img string) (is bool, err error) {
-	return fmount.IsBootable(img)
+	f, err := os.Open(img)
+
+	if err != nil {
+		return
+	}
+
+	defer f.Close()
+
+	b := make([]byte, 4)
+
+	n, err := f.Read(b)
+
+	if err != nil {
+		return
+	}
+
+	if n != len(b) {
+		err = errors.New("could not read header")
+		return
+	}
+
+	return bytes.Equal(b, header), nil
 }
 
 func Mount(img, mnt, key string, so bool) (parts []string, err error) {
@@ -34,23 +57,31 @@ func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 		return
 	}
 
-	// attach image as loop device
-	loi, err := fmount.LoSetupAttach(img)
-
-	if err != nil {
+	// ensure kernel module is loaded
+	if err = ensureMod(fmount.QemuParts); err != nil {
 		return
 	}
 
-	// get partition loop devices
-	lops, err := fmount.PartDevs(loi)
+	// attach image as network block device
+	if err = fmount.QemuAttach(fmount.QemuDev, img); err != nil {
+		return
+	}
+
+	// create image symlink directory to track image relations
+	if err = fmount.CreateImageSymlink(img, fmount.QemuDev); err != nil {
+		return
+	}
+
+	// get partition network block devices
+	nbdps, err := fmount.PartDevs(fmount.QemuDev)
 
 	if err != nil {
 		return
 	}
 
 	// handle found partitions
-	for i, lop := range lops {
-		dev := fmount.Dev(lop)
+	for i, nbdp := range nbdps {
+		dev := fmount.Dev(nbdp)
 
 		// check if partition is bootable
 		sp, err := fmount.IsBootable(dev)
@@ -103,7 +134,7 @@ func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 				}
 
 				// create symlink to track device relations
-				if err = fmount.CreateSymlink(lop, mntf); err != nil {
+				if err = fmount.CreateSymlink(nbdp, mntf); err != nil {
 					sys.Error(err)
 					continue
 				}
@@ -144,18 +175,18 @@ func Unmount(img string) (err error) {
 		return
 	}
 
-	// get loop devices associated with image
-	lois, err := fmount.LoopDevs(img)
+	// get network block devices associated with image
+	nbds, err := fmount.BlockDevs(img)
 
 	if err != nil {
 		return
 	}
 
-	// handle found loop devices
-	for _, loi := range lois {
+	// handle found network block devices
+	for _, nbd := range nbds {
 
 		// get partition devices
-		lops, err := fmount.PartDevs(loi)
+		nbdps, err := fmount.PartDevs(nbd)
 
 		if err != nil {
 			sys.Error(err)
@@ -163,7 +194,7 @@ func Unmount(img string) (err error) {
 		}
 
 		// get mount points of device
-		mnts, err := fmount.Mounts(loi)
+		mnts, err := fmount.Mounts(nbd)
 
 		if err != nil {
 			sys.Error(err)
@@ -171,8 +202,8 @@ func Unmount(img string) (err error) {
 		}
 
 		// handle found partitions
-		for _, lop := range lops {
-			dev := fmount.Dev(lop)
+		for _, nbdp := range nbdps {
+			dev := fmount.Dev(nbdp)
 
 			// check if partition is encrypted
 			is, err := fmount.IsEncrypted(dev)
@@ -186,7 +217,7 @@ func Unmount(img string) (err error) {
 			if is {
 
 				// follow symlink and get partition mount points
-				src, err := fmount.FollowSymlink(lop)
+				src, err := fmount.FollowSymlink(nbdp)
 
 				if err != nil {
 					sys.Error(err)
@@ -209,29 +240,39 @@ func Unmount(img string) (err error) {
 					continue
 				}
 
-				// detach partition loop device
-				if err = fmount.LoSetupDetach(lop); err != nil {
+				// detach partition network block device
+				if err = fmount.QemuDetach(dev); err != nil {
 					sys.Error(err)
 					continue
 				}
 
 				// remove symlink
-				if err = fmount.RemoveSymlink(lop); err != nil {
+				if err = fmount.RemoveSymlink(nbdp); err != nil {
 					sys.Error(err)
 					continue
 				}
 			} else {
 
-				// unmount partition loop device
+				// unmount partition network block device
 				if err = fmount.UmountDev(dev); err != nil {
+					sys.Error(err)
+					continue
+				}
+
+				// detach partition network block device
+				if err = fmount.QemuDetach(dev); err != nil {
 					sys.Error(err)
 					continue
 				}
 			}
 		}
 
-		// detach loop device
-		fmount.LoSetupDetach(loi)
+		// remove image symlink directory
+		dir := filepath.Join(fmount.SymlinkPath, filepath.Base(img))
+
+		if err = os.RemoveAll(dir); err != nil {
+			sys.Error(err)
+		}
 
 		// remove empty mount points
 		for _, mnt := range mnts {
@@ -245,4 +286,18 @@ func Unmount(img string) (err error) {
 	}
 
 	return nil
+}
+
+func ensureMod(mp int) (err error) {
+	is, err := fmount.IsLoaded("nbd")
+
+	if err != nil {
+		return
+	}
+
+	if !is {
+		fmount.ModLoad("nbd", fmt.Sprintf("max_part=%d", mp))
+	}
+
+	return
 }

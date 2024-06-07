@@ -1,21 +1,21 @@
-// Mount forensic disk images for read-only processing.
+// Mount forensic VMDK disk images for read-only processing.
 //
 // Usage:
 //
-//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
+//	fmount.vmdk [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE
 //
 // The flags are:
 //
 //	 -D directory
 //		The mount point directory.
-//	 -T type
-//	    The disk image type.
 //	 -B key
 //	 	The BitLocker key.
 //	 -H algorithm
 //	 	The hash algorithm to use.
 //	 -V sum
 //	 	The hash sum to verify.
+//	 -f
+//		Force type (bypass check).
 //	 -s
 //		System partition only.
 //	 -u
@@ -42,16 +42,15 @@ import (
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/fmount"
-	"github.com/cuhsat/fact/pkg/fmount/dd"
 	"github.com/cuhsat/fact/pkg/fmount/vmdk"
 )
 
 func main() {
 	D := flag.String("D", "", "Mount point")
-	T := flag.String("T", "", "Image type")
 	B := flag.String("B", "", "BitLocker key")
 	H := flag.String("H", "", "Hash algorithm")
 	V := flag.String("V", "", "Hash sum")
+	f := flag.Bool("f", false, "Force mounting")
 	s := flag.Bool("s", false, "System partition only")
 	u := flag.Bool("u", false, "Unmount image")
 	z := flag.Bool("z", false, "Unzip image")
@@ -65,61 +64,64 @@ func main() {
 	img := sys.Arg()
 
 	if *v {
-		sys.Final("fmount", fact.Version)
+		sys.Final("fmount.vmdk", fact.Version)
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE")
-	}
-
-	it, err := fmount.DetectType(img, *T)
-
-	if err != nil {
-		sys.Fatal(err)
-	}
-
-	args := make([]string, 0)
-
-	if len(*D) > 0 {
-		args = append(args, "-D", *D)
-	}
-
-	if len(*B) > 0 {
-		args = append(args, "-B", *B)
-	}
-
-	if len(*H) > 0 {
-		args = append(args, "-H", *H)
-	}
-
-	if len(*V) > 0 {
-		args = append(args, "-V", *V)
-	}
-
-	if *s {
-		args = append(args, "-s")
-	}
-
-	if *u {
-		args = append(args, "-u")
-	}
-
-	if *z {
-		args = append(args, "-z")
+		sys.Usage("fmount.vmdk [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE")
 	}
 
 	if *q {
-		args = append(args, "-q")
+		sys.Progress = nil
 	}
 
-	args = append(args, img)
+	if *z {
+		ex, err := fmount.Extract(img)
 
-	switch it {
-	case vmdk.VMDK:
-		fmount.Forward("fmount.vmdk", args...)
-	case dd.RAW, dd.DD:
-		fmount.Forward("fmount.dd", args...)
-	default:
-		sys.Fatal("image type not supported:", it)
+		if err != nil {
+			sys.Fatal(err)
+		} else {
+			img = ex
+		}
+	}
+
+	if (len(*H) == 0) != (len(*V) == 0) {
+		sys.Fatal("hash algorithm and sum are required")
+	}
+
+	if len(*H) > 0 && len(*V) > 0 {
+		ok, err := fmount.Verify(img, *H, *V)
+
+		if err != nil {
+			sys.Fatal(err)
+		}
+
+		if !ok {
+			sys.Fatal("hash sum does not match")
+		}
+	}
+
+	if !*f {
+		is, err := vmdk.Is(img)
+
+		if err != nil {
+			sys.Fatal(err)
+		}
+
+		if !is {
+			sys.Fatal("image type not supported")
+		}
+	}
+
+	var err error
+
+	if *u {
+		err = vmdk.Unmount(img)
+	} else {
+		_, err = vmdk.Mount(img, *D, *B, *s)
+	}
+
+	if err != nil {
+		sys.Fatal(err)
 	}
 }

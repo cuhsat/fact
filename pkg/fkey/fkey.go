@@ -13,7 +13,7 @@ func RecoveryKeyIds(img string) (ids []string, err error) {
 		return
 	}
 
-	lops, err := fmount.Parts(loi)
+	lops, err := fmount.PartDevs(loi)
 
 	if err != nil {
 		return

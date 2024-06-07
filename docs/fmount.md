@@ -2,7 +2,7 @@
 Mount forensic disk images for read-only processing.
 
 ```sh
-# fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
+# fmount [-ruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
 ```
 
 Available options:
@@ -12,8 +12,9 @@ Available options:
 - `-B` BitLocker key
 - `-H` Hash algorithm
 - `-V` Verify hash sum
-- `-s` System partition only
+- `-r` Recovery key ids 
 - `-u` Unmount image
+- `-s` System partition only
 - `-z` Unzip image
 - `-q` Quiet mode
 - `-h` Show usage

@@ -45,6 +45,47 @@ func Is(img string) (is bool, err error) {
 	return bytes.Equal(b, header), nil
 }
 
+func KeyIds(img string) (ids []string, err error) {
+	if err = ensureMod(fmount.QemuParts); err != nil {
+		return
+	}
+
+	if err = fmount.QemuAttach(fmount.QemuDev, img); err != nil {
+		return
+	}
+
+	nbdps, err := fmount.PartDevs(fmount.QemuDev)
+
+	if err != nil {
+		return
+	}
+
+	for _, nbdp := range nbdps {
+		dev := fmount.Dev(nbdp)
+
+		idps, err := fmount.DislockerInfo(dev)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		if sys.Progress != nil {
+			for _, idp := range idps {
+				sys.Progress(idp)
+			}
+		}
+
+		ids = append(ids, idps...)
+
+		if err = fmount.QemuDetach(dev); err != nil {
+			sys.Error(err)
+		}
+	}
+
+	return
+}
+
 func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 
 	// create symlink directory

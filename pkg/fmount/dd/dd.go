@@ -22,6 +22,45 @@ func Is(img string) (is bool, err error) {
 	return fmount.IsBootable(img)
 }
 
+func KeyIds(img string) (ids []string, err error) {
+	loi, err := fmount.LoSetupAttach(img)
+
+	if err != nil {
+		return
+	}
+
+	lops, err := fmount.PartDevs(loi)
+
+	if err != nil {
+		return
+	}
+
+	for _, lop := range lops {
+		dev := fmount.Dev(lop)
+
+		idps, err := fmount.DislockerInfo(dev)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		if sys.Progress != nil {
+			for _, idp := range idps {
+				sys.Progress(idp)
+			}
+		}
+
+		ids = append(ids, idps...)
+
+		if err = fmount.LoSetupDetach(dev); err != nil {
+			sys.Error(err)
+		}
+	}
+
+	return
+}
+
 func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 
 	// create symlink directory

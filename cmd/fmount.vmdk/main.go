@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount.vmdk [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE
+//	fmount.vmdk [-fruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE
 //
 // The flags are:
 //
@@ -16,10 +16,12 @@
 //	 	The hash sum to verify.
 //	 -f
 //		Force type (bypass check).
-//	 -s
-//		System partition only.
+//	 -r
+//		Search recovery key ids.
 //	 -u
 //		Unmount image.
+//	 -s
+//		System partition only.
 //	 -z
 //		Unzip image.
 //	 -q
@@ -51,6 +53,7 @@ func main() {
 	H := flag.String("H", "", "Hash algorithm")
 	V := flag.String("V", "", "Hash sum")
 	f := flag.Bool("f", false, "Force mounting")
+	r := flag.Bool("r", false, "Recovery key ids")
 	s := flag.Bool("s", false, "System partition only")
 	u := flag.Bool("u", false, "Unmount image")
 	z := flag.Bool("z", false, "Unzip image")
@@ -68,7 +71,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount.vmdk [-fsuzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE")
+		sys.Usage("fmount.vmdk [-fruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE")
 	}
 
 	if *q {
@@ -115,7 +118,9 @@ func main() {
 
 	var err error
 
-	if *u {
+	if *r {
+		_, err = vmdk.KeyIds(img)
+	} else if *u {
 		err = vmdk.Unmount(img)
 	} else {
 		_, err = vmdk.Mount(img, *D, *B, *s)

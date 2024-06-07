@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
+//	fmount [-ruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE
 //
 // The flags are:
 //
@@ -16,10 +16,12 @@
 //	 	The hash algorithm to use.
 //	 -V sum
 //	 	The hash sum to verify.
-//	 -s
-//		System partition only.
+//	 -r
+//		Search recovery key ids.
 //	 -u
 //		Unmount image.
+//	 -s
+//		System partition only.
 //	 -z
 //		Unzip image.
 //	 -q
@@ -52,8 +54,9 @@ func main() {
 	B := flag.String("B", "", "BitLocker key")
 	H := flag.String("H", "", "Hash algorithm")
 	V := flag.String("V", "", "Hash sum")
-	s := flag.Bool("s", false, "System partition only")
+	r := flag.Bool("r", false, "Recovery key ids")
 	u := flag.Bool("u", false, "Unmount image")
+	s := flag.Bool("s", false, "System partition only")
 	z := flag.Bool("z", false, "Unzip image")
 	q := flag.Bool("q", false, "Quiet mode")
 	h := flag.Bool("h", false, "Show usage")
@@ -69,7 +72,7 @@ func main() {
 	}
 
 	if *h || len(img) == 0 {
-		sys.Usage("fmount [-suzqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE")
+		sys.Usage("fmount [-ruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-T RAW|DD|VMDK] [-D DIR] IMAGE")
 	}
 
 	it, err := fmount.DetectType(img, *T)
@@ -96,12 +99,16 @@ func main() {
 		args = append(args, "-V", *V)
 	}
 
-	if *s {
-		args = append(args, "-s")
+	if *r {
+		args = append(args, "-r")
 	}
 
 	if *u {
 		args = append(args, "-u")
+	}
+
+	if *s {
+		args = append(args, "-s")
 	}
 
 	if *z {

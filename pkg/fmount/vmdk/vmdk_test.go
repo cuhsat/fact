@@ -61,6 +61,10 @@ func TestVMDK(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			if _, err = os.Stat(mnt); !os.IsNotExist(err) {
+				t.Fatal("mount point not removed")
+			}
 		})
 	}
 }

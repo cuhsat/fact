@@ -69,7 +69,7 @@ func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 	}
 
 	// create mount point
-	if err = fmount.CreateImageMount(img, mnt); err != nil {
+	if mnt, err = fmount.CreateImageMount(img, mnt); err != nil {
 		return
 	}
 

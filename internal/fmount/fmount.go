@@ -160,12 +160,12 @@ func IsEncrypted(dev string) (is bool, err error) {
 	return
 }
 
-func CreateImageMount(img, mnt string) error {
+func CreateImageMount(img, mnt string) (dir string, err error) {
 	if len(mnt) == 0 {
 		mnt = BaseFile(img)
 	}
 
-	return os.MkdirAll(mnt, sys.MODE_DIR)
+	return mnt, os.MkdirAll(mnt, sys.MODE_DIR)
 }
 
 func CreateImageSymlink(img, dev string) (err error) {

@@ -2,24 +2,68 @@
 package flog
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/cuhsat/fact/internal/fact"
+	"github.com/cuhsat/fact/internal/flog"
 	"github.com/cuhsat/fact/internal/sys"
-	"github.com/cuhsat/fact/pkg/flog/evtx"
+	"github.com/cuhsat/fact/pkg/ecs"
 )
 
-func Evtx(files, args []string) (err error) {
-	for _, f := range files {
-		if filepath.Ext(f) == evtx.Evtx {
-			args = append(args, f)
-		}
+const (
+	Evtx = "evtx"
+)
+
+func LogEvent(src, dir string, pty bool) (logs []string, err error) {
+	lines, err := flog.ImportEvent(src, dir)
+
+	if err != nil {
+		return
 	}
 
-	_, err = sys.StdCall("flog.evtx", args...)
+	b := filepath.Base(src)
 
-	return
+	f := strings.TrimSuffix(b, filepath.Ext(b))
+
+	for i, line := range lines {
+		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
+
+		e, err := ecs.MapEvent(line, src)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		b, err := e.Bytes(pty)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		if err = flog.ExportEvent(b, dst); err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		l, err := filepath.Abs(dst)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		if sys.Progress != nil {
+			sys.Progress(l)
+		}
+
+		logs = append(logs, l)
+	}
+
+	return logs, nil
 }
 
 func StripHash(in []string) (out []string) {

@@ -2,7 +2,7 @@
 //
 // Usage:
 //
-//	flog [-pqhv] [-D DIRECTORY] [FILE ...]
+//	flog [-pqhv] [-D DIR] [FILE ...]
 //
 // The flags are:
 //
@@ -20,13 +20,14 @@
 // The arguments are:
 //
 //	 file
-//		The artifact file(s) to process.
+//		The event log file(s) to process.
 //		Defaults to STDIN if not given.
 package main
 
 import (
 	"flag"
 	"io"
+	"path/filepath"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
@@ -51,28 +52,23 @@ func main() {
 	}
 
 	if *h || len(files) == 0 {
-		sys.Usage("flog [-pqhv] [-D DIRECTORY] [FILE ...]")
-	}
-
-	args := make([]string, 0)
-
-	if len(*D) > 0 {
-		args = append(args, "-D", *D)
-	}
-
-	if *p {
-		args = append(args, "-p")
+		sys.Usage("flog [-pqhv] [-D DIR] [FILE ...]")
 	}
 
 	if *q {
-		args = append(args, "-q")
+		sys.Progress = nil
 	}
 
 	g := new(errgroup.Group)
 
-	g.Go(func() error {
-		return flog.Evtx(files, args)
-	})
+	for _, f := range files {
+		if filepath.Ext(f) == flog.Evtx {
+			g.Go(func() (err error) {
+				_, err = flog.LogEvent(f, *D, *p)
+				return
+			})
+		}
+	}
 
 	if err := g.Wait(); err != nil {
 		sys.Fatal(err)

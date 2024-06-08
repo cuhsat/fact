@@ -171,13 +171,17 @@ func CreateImageMount(img, mnt string) error {
 func CreateImageSymlink(img, dev string) (err error) {
 	dir := filepath.Join(SymlinkPath, filepath.Base(img))
 
+	if _, err = os.Stat(dir); !os.IsNotExist(err) {
+		if err = os.RemoveAll(dir); err != nil {
+			sys.Error(err)
+		}
+	}
+
 	if err = os.MkdirAll(dir, sys.MODE_DIR); err != nil {
 		return
 	}
 
 	lnk := filepath.Join(dir, filepath.Base(dev))
-
-	// TODO: remove symlink if exists?
 
 	return os.Symlink(dev, lnk)
 }

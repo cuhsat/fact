@@ -68,21 +68,6 @@ func BlockDevs(img string) (nbds []string, err error) {
 	return
 }
 
-func LoopDevs(img string) (los []string, err error) {
-	los, err = LoSetupList(img)
-
-	if err != nil {
-		return
-	}
-
-	if len(los) == 0 {
-		err = errors.New("no devices found")
-		return
-	}
-
-	return
-}
-
 func PartDevs(dev string) (ps []string, err error) {
 	ps, err = LsBlk(dev, "name")
 

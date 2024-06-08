@@ -5,7 +5,6 @@ import (
 	"encoding/csv"
 	"fmt"
 	"os"
-	"path/filepath"
 	"runtime"
 	"sync"
 	"time"
@@ -13,7 +12,7 @@ import (
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/fact/hash"
 	"github.com/cuhsat/fact/internal/fact/zip"
-	vsc "github.com/cuhsat/fact/internal/ffind"
+	internal "github.com/cuhsat/fact/internal/ffind"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/windows"
 )
@@ -112,7 +111,7 @@ func (ff *ffind) enum(out chan<- string) {
 	defer ff.wg.Done()
 
 	if ff.sc {
-		sc, err := vsc.ShadowCopy(windows.SystemDrive())
+		sc, err := internal.ShadowCopy(windows.SystemDrive())
 
 		if err != nil {
 			sys.Fatal(err)
@@ -179,14 +178,14 @@ func (ff *ffind) list(in <-chan string, out chan<- string) {
 
 	w := csv.NewWriter(f)
 
-	err = w.Write(header())
+	err = w.Write(internal.Header())
 
 	if err != nil {
 		sys.Fatal(err)
 	}
 
 	for artifact := range in {
-		err = w.Write(record(artifact))
+		err = w.Write(internal.Record(artifact))
 
 		if err != nil {
 			sys.Error(err)
@@ -240,30 +239,4 @@ func (ff *ffind) path(f string) string {
 	}
 
 	return f[r:]
-}
-
-func header() []string {
-	return []string{
-		"Filename",
-		"Path",
-		"Size (bytes)",
-		"Modified",
-	}
-}
-
-func record(f string) (l []string) {
-	l = append(l, filepath.Base(f))
-	l = append(l, f)
-
-	fi, err := os.Stat(f)
-
-	if err != nil {
-		sys.Error(err)
-		return
-	}
-
-	l = append(l, fmt.Sprintf("%d", fi.Size()))
-	l = append(l, fi.ModTime().String())
-
-	return
 }

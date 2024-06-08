@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Instal packages
+    - name: Install packages
       run: |
         sudo apt update -y
         sudo apt install -y qemu-utils

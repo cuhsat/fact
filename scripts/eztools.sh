@@ -24,7 +24,7 @@ installMap () {
     install "$2/$1"
 }
 
-mkdir -p $BIN
+mkdir -p $BIN $TMP
 
 download "EvtxECmd" && installMap "EvtxECmd" "EvtxeCmd"
 download "JLECmd" && install "JLECmd"

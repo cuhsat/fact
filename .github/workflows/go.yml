@@ -8,7 +8,7 @@ on:
 
 env:
   BIN: ${{ github.workspace }}/bin
-  TMP: ${{ github.temp }}
+  TMP: ${{ github.workspace }}/tmp
 
 jobs:
   build:

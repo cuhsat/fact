@@ -8,6 +8,7 @@ on:
 
 env:
   BIN: ${{ github.workspace }}/bin
+  TMP: ${{ runner.temp }}
 
 jobs:
   build:

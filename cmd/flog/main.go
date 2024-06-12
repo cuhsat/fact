@@ -27,12 +27,10 @@ package main
 import (
 	"flag"
 	"io"
-	"path/filepath"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/pkg/flog"
-	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -45,7 +43,9 @@ func main() {
 	flag.CommandLine.SetOutput(io.Discard)
 	flag.Parse()
 
-	files := flog.StripHash(sys.Args())
+	args, _ := sys.Args()
+
+	files := flog.StripHash(args)
 
 	if *v {
 		sys.Final("flog", fact.Version)
@@ -59,18 +59,9 @@ func main() {
 		sys.Progress = nil
 	}
 
-	g := new(errgroup.Group)
+	err := flog.Log(files, *D, *p)
 
-	for _, f := range files {
-		if filepath.Ext(f) == flog.Evtx {
-			g.Go(func() (err error) {
-				_, err = flog.LogEvent(f, *D, *p)
-				return
-			})
-		}
-	}
-
-	if err := g.Wait(); err != nil {
+	if err != nil {
 		sys.Fatal(err)
 	}
 }

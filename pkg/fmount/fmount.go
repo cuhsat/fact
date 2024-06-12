@@ -14,7 +14,7 @@ import (
 	"github.com/cuhsat/fact/internal/sys"
 )
 
-func Mount(img, mnt, key string, so bool) (parts []string, err error) {
+func Mount(img, mnt, key string, so bool, xargs []string) (parts []string, err error) {
 
 	// create symlink directory
 	if err = os.MkdirAll(fmount.SymlinkPath, sys.MODE_DIR); err != nil {
@@ -27,12 +27,12 @@ func Mount(img, mnt, key string, so bool) (parts []string, err error) {
 	}
 
 	// ensure kernel module is loaded
-	if err = ensureMod(fmount.QemuParts); err != nil {
+	if err = fmount.EnsureMod(fmount.QemuParts); err != nil {
 		return
 	}
 
 	// attach image as network block device
-	if err = fmount.QemuAttach(fmount.QemuDev, img); err != nil {
+	if err = fmount.QemuAttach(fmount.QemuDev, img, xargs); err != nil {
 		return
 	}
 
@@ -257,12 +257,12 @@ func Unmount(img string) (err error) {
 	return nil
 }
 
-func KeyIds(img string) (ids []string, err error) {
-	if err = ensureMod(fmount.QemuParts); err != nil {
+func KeyIds(img string, xargs []string) (ids []string, err error) {
+	if err = fmount.EnsureMod(fmount.QemuParts); err != nil {
 		return
 	}
 
-	if err = fmount.QemuAttach(fmount.QemuDev, img); err != nil {
+	if err = fmount.QemuAttach(fmount.QemuDev, img, xargs); err != nil {
 		return
 	}
 
@@ -334,20 +334,6 @@ func Verify(img, algo, sum string) (ok bool, err error) {
 	}
 
 	ok = fmt.Sprintf("%x", b) == strings.ToLower(sum)
-
-	return
-}
-
-func ensureMod(mp int) (err error) {
-	is, err := fmount.IsLoaded("nbd")
-
-	if err != nil {
-		return
-	}
-
-	if !is {
-		fmount.ModLoad("nbd", fmt.Sprintf("max_part=%d", mp))
-	}
 
 	return
 }

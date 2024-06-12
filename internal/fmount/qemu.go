@@ -7,11 +7,13 @@ import (
 
 const (
 	QemuDev   = "/dev/nbd1"
-	QemuParts = 6
+	QemuParts = 16
 )
 
-func QemuAttach(dev, img string) (err error) {
-	_, err = sys.StdCall("qemu-nbd", "--fork", "-r", "-c", dev, img)
+func QemuAttach(dev, img string, xargs []string) (err error) {
+	_, err = sys.StdCall("qemu-nbd", append([]string{
+		"--fork", "-r", "-c", dev, img,
+	}, xargs...)...)
 
 	return
 }

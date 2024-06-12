@@ -100,14 +100,13 @@ Required system commands:
 > Use `make tools` to install [Eric Zimmerman's Tools](https://ericzimmerman.github.io/#!index.md).
 
 #### Roadmap
-- [ ] Support for [System Active Directory](https://forensics.wiki/active_directory/)
-- [ ] Support for [System Registry Hives](https://forensics.wiki/windows_registry/)
-- [ ] Support for [System Prefetch Files](https://forensics.wiki/prefetch/)
-- [x] Support for [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)
-- [ ] Support for [System AmCache](https://forensics.wiki/amcache/)
-- [ ] Support for [User Registry Hives](https://forensics.wiki/windows_registry/)
-- [ ] Support for [User Jump Lists](https://forensics.wiki/jump_lists/)
-- [ ] Support for [User Browser Histories](https://forensics.wiki/google_chrome/)
+- [ ] [System Active Directory](https://forensics.wiki/active_directory/)
+- [ ] [System Prefetch Files](https://forensics.wiki/prefetch/)
+- [x] [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)
+- [ ] [System AmCache](https://forensics.wiki/amcache/)
+- [ ] [User ShellBags](https://forensics.wiki/shell_item/)
+- [x] [User JumpLists](https://forensics.wiki/jump_lists/)
+- [ ] [User Browser Histories](https://forensics.wiki/google_chrome/)
 
 ## License
 Released under the [MIT License](LICENSE).

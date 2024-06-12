@@ -60,19 +60,21 @@ func main() {
 	flag.CommandLine.SetOutput(io.Discard)
 	flag.Parse()
 
-	img := sys.Arg()
+	args, xargs := sys.Args()
 
 	if *v {
 		sys.Final("fmount", fact.Version)
 	}
 
-	if *h || len(img) == 0 {
+	if *h || len(args) == 0 {
 		sys.Usage("fmount [-ruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE")
 	}
 
 	if *q {
 		sys.Progress = nil
 	}
+
+	img := args[0]
 
 	if *z {
 		ex, err := fmount.Extract(img)
@@ -102,12 +104,12 @@ func main() {
 
 	var err error
 
-	if *r {
-		_, err = fmount.KeyIds(img)
-	} else if *u {
+	if *u {
 		err = fmount.Unmount(img)
+	} else if *r {
+		_, err = fmount.KeyIds(img, xargs)
 	} else {
-		_, err = fmount.Mount(img, *D, *B, *s)
+		_, err = fmount.Mount(img, *D, *B, *s, xargs)
 	}
 
 	if err != nil {

@@ -21,25 +21,41 @@ var (
 )
 
 type Map struct {
+	c map[string]string
 	o object
 }
 
 type object any
 
 func NewMap(s string) (m *Map, err error) {
-	m = &Map{}
+	m = &Map{
+		c: make(map[string]string, 100),
+	}
 
 	b := bytes.TrimPrefix([]byte(s), bom)
 
 	return m, json.Unmarshal(b, &m.o)
 }
 
-func (m *Map) GetString(key string) (value string) {
-	return rget(m.o, strings.Split(key, KeySep))
+func (m *Map) GetString(keys ...string) (value string) {
+	for _, key := range keys {
+		if value, ok := m.c[key]; ok {
+			return value
+		}
+
+		value = rget(m.o, strings.Split(key, KeySep))
+
+		if len(value) > 0 {
+			m.c[key] = value
+			return
+		}
+	}
+
+	return
 }
 
-func (m *Map) GetInt64(key string) (value int64) {
-	value, err := strconv.ParseInt(m.GetString(key), 10, 64)
+func (m *Map) GetInt64(keys ...string) (value int64) {
+	value, err := strconv.ParseInt(m.GetString(keys...), 10, 64)
 
 	if err != nil {
 		return -1 // default
@@ -48,10 +64,10 @@ func (m *Map) GetInt64(key string) (value int64) {
 	return
 }
 
-func (m *Map) GetTime(key string) (value time.Time) {
+func (m *Map) GetTime(keys ...string) (value time.Time) {
 	const layout = "2006-01-02 15:04:05.9999999"
 
-	value, err := time.Parse(layout, m.GetString(key))
+	value, err := time.Parse(layout, m.GetString(keys...))
 
 	if err != nil {
 		return time.UnixMicro(0) // default

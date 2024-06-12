@@ -16,10 +16,6 @@ const (
 	SymlinkPath = "/tmp/fmount"
 )
 
-var (
-	MbrMagic = []byte{0x55, 0xAA}
-)
-
 func Dev(loop string) string {
 	return filepath.Join("/dev", loop)
 }
@@ -32,6 +28,22 @@ func BaseFile(name string) string {
 	b := filepath.Base(name)
 
 	return strings.TrimSuffix(b, filepath.Ext(b))
+}
+
+func EnsureMod(max int) (err error) {
+	ls, err := ModList("nbd")
+
+	if err != nil {
+		return
+	}
+
+	for _, l := range ls {
+		if strings.HasPrefix(l, "nbd ") {
+			return
+		}
+	}
+
+	return ModLoad("nbd", fmt.Sprintf("max_part=%d", max))
 }
 
 func BlockDevs(img string) (nbds []string, err error) {
@@ -89,18 +101,6 @@ func Mounts(dev string) (mnts []string, err error) {
 	return LsBlk(dev, "mountpoints")
 }
 
-func IsLoaded(mod string) (is bool, err error) {
-	ls, err := ModList(mod)
-
-	for _, l := range ls {
-		if strings.HasPrefix(l, mod+" ") {
-			return true, nil
-		}
-	}
-
-	return
-}
-
 func IsBootable(dev string) (is bool, err error) {
 	f, err := os.Open(dev)
 
@@ -123,7 +123,7 @@ func IsBootable(dev string) (is bool, err error) {
 		return
 	}
 
-	is = bytes.Equal(b[0x1FE:0x200], MbrMagic)
+	is = bytes.Equal(b[0x1FE:0x200], []byte{0x55, 0xAA})
 
 	return
 }

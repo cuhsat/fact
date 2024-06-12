@@ -8,20 +8,27 @@ import (
 
 	"github.com/cuhsat/fact/internal/fact/zip"
 	"github.com/cuhsat/fact/internal/fmount"
+	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/internal/test"
 )
+
+func TestMain(m *testing.M) {
+	sys.Progress = nil
+
+	os.Exit(m.Run())
+}
 
 func TestMount(t *testing.T) {
 	cases := []struct {
 		name, file, path string
 	}{
 		{
-			name: "Test mount for Windows (dd)",
+			name: "Test mount with dd image",
 			file: test.Testdata("windows", "disk.dd.zip"),
 			path: "dd",
 		},
 		{
-			name: "Test mount for Windows (vmdk)",
+			name: "Test mount with vmdk image",
 			file: test.Testdata("windows", "disk.vmdk.zip"),
 			path: "dd",
 		},

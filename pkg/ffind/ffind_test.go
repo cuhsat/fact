@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/cuhsat/fact/internal/fact/zip"
+	"github.com/cuhsat/fact/internal/sys"
 	"github.com/cuhsat/fact/internal/test"
 )
 
@@ -18,12 +19,18 @@ var (
 	sysroot = filepath.Join(tmp, "sysroot")
 )
 
+func TestMain(m *testing.M) {
+	sys.Progress = nil
+
+	os.Exit(m.Run())
+}
+
 func TestFind(t *testing.T) {
 	cases := []struct {
 		name, file string
 	}{
 		{
-			name: "Test find for Windows",
+			name: "Test find on a Windows system",
 			file: test.Testdata("windows", "root.zip"),
 		},
 	}

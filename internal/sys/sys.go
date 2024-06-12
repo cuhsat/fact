@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
 	"strings"
 )
 
@@ -65,29 +66,31 @@ func Debug(d string) {
 	}
 }
 
-func Arg() (p string) {
-	l := Args()
-
-	if len(l) > 0 {
-		p = l[0]
-	}
-
-	return
-}
-
-func Args() []string {
+func Args() (args, xargs []string) {
 	if flag.NArg() > 0 {
-		return flag.Args()
+		args = flag.Args()
+	} else {
+		stdin, err, code := Stdin()
+
+		if err != nil {
+			Error(err)
+			os.Exit(code)
+		}
+
+		if len(stdin) > 0 {
+			args = strings.Split(stdin, "\n")
+		}
 	}
 
-	stdin, err, code := Stdin()
+	i := slices.IndexFunc(args, func(a string) bool {
+		return a == "--"
+	})
 
-	if err != nil {
-		Error(err)
-		os.Exit(code)
+	if i > -1 && i < len(args)-1 {
+		return args[:i], args[i+1:]
+	} else {
+		return
 	}
-
-	return strings.Split(stdin, "\n")
 }
 
 func Stdin() (in string, err error, code int) {

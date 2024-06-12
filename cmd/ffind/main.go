@@ -58,7 +58,7 @@ func main() {
 	flag.CommandLine.SetOutput(io.Discard)
 	flag.Parse()
 
-	mnt := sys.Args()
+	mnts, _ := sys.Args()
 
 	if *v {
 		sys.Final("ffind", fact.Version)
@@ -80,12 +80,12 @@ func main() {
 		sys.Fatal("system or user required")
 	}
 
-	if *r && len(mnt) > 1 {
+	if *r && len(mnts) > 1 {
 		sys.Error("relative paths disabled")
 		*r = false
 	}
 
-	for _, p := range mnt {
+	for _, p := range mnts {
 		ffind.Find(p, *Z, *C, *H, *r, *c, *s, *u)
 	}
 }

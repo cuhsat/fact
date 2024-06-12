@@ -47,7 +47,7 @@ func TestMount(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			img := filepath.Join(tmp, fmount.BaseFile(tt.file))
 
-			p, err := Mount(img, mnt, "", true)
+			p, err := Mount(img, mnt, "", true, []string{})
 
 			if err != nil {
 				t.Fatal(err)

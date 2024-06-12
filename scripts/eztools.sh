@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 BIN="bin"
-TMP="/tmp/fact"
+TMP="/var/tmp/fact"
 URL="https://f001.backblazeb2.com/file/EricZimmermanTools/net6"
 
 echo "Download tools"

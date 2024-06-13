@@ -104,8 +104,8 @@ Required system commands:
 - [ ] [System Prefetch Files](https://forensics.wiki/prefetch/)
 - [x] [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)
 - [ ] [System AmCache](https://forensics.wiki/amcache/)
-- [ ] [User ShellBags](https://forensics.wiki/shell_item/)
 - [x] [User JumpLists](https://forensics.wiki/jump_lists/)
+- [x] [User ShellBags](https://forensics.wiki/shell_item/)
 - [ ] [User Browser Histories](https://forensics.wiki/google_chrome/)
 
 ## License

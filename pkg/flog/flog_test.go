@@ -26,7 +26,7 @@ func TestLogEvent(t *testing.T) {
 	}{
 		{
 			name: "Test log event",
-			data: test.Testdata("windows", "evtx.zip"),
+			data: test.Testdata("windows", "system.zip"),
 			file: "System.evtx",
 		},
 	}
@@ -70,12 +70,12 @@ func TestLogJumpList(t *testing.T) {
 	}{
 		{
 			name: "Test log automatic jumplist",
-			data: test.Testdata("windows", "ms.zip"),
+			data: test.Testdata("windows", "user.zip"),
 			file: "0.automaticDestinations-ms",
 		},
 		{
 			name: "Test log custom jumplist",
-			data: test.Testdata("windows", "ms.zip"),
+			data: test.Testdata("windows", "user.zip"),
 			file: "0.customDestinations-ms",
 		},
 	}
@@ -98,6 +98,50 @@ func TestLogJumpList(t *testing.T) {
 
 			if len(l) != 2 {
 				t.Fatal("file count differs")
+			}
+
+			b, err := os.ReadFile(l[0])
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !json.Valid(b) {
+				t.Fatal("invalid json")
+			}
+		})
+	}
+}
+
+func TestLogShellbag(t *testing.T) {
+	cases := []struct {
+		name, data, file string
+	}{
+		{
+			name: "Test log usrclass.dat",
+			data: test.Testdata("windows", "user.zip"),
+			file: "UsrClass.dat",
+		},
+	}
+
+	for _, tt := range cases {
+		tmp, _ := os.MkdirTemp(os.TempDir(), "log")
+
+		err := zip.Unzip(tt.data, tmp)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			l, err := LogShellBag(filepath.Join(tmp, tt.file), tmp, true)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(l) == 0 {
+				t.Fatal("file count zero")
 			}
 
 			b, err := os.ReadFile(l[0])

@@ -18,6 +18,24 @@ func BaseFile(name string) string {
 	return strings.TrimSuffix(b, filepath.Ext(b))
 }
 
+func Copy(dir, src string) (err error) {
+	dst := filepath.Join(dir, filepath.Base(src))
+
+	b, err := os.ReadFile(src)
+
+	if err != nil {
+		return
+	}
+
+	err = os.WriteFile(dst, b, sys.MODE_FILE)
+
+	if os.IsNotExist(err) {
+		err = nil
+	}
+
+	return
+}
+
 func ConsumeJson(name string) (lines []string, err error) {
 	f, err := os.Open(name)
 

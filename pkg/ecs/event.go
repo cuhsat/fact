@@ -2,8 +2,6 @@
 package ecs
 
 import (
-	"time"
-
 	"github.com/cuhsat/fact/internal/flog"
 )
 
@@ -14,48 +12,39 @@ func MapEvent(s, src string) (log *Log, err error) {
 		return
 	}
 
-	channel := m.GetString("Event/System/Channel")
+	log = NewLog(s, src, &Base{
+		Timestamp: m.GetTime("Event/System/TimeCreated/@SystemTime"),
+		Message:   m.GetString("Event/EventData/Data/#text"),
+		Tags:      "EventLog",
+		Labels: map[string]interface{}{
+			"Channel": m.GetString("Event/System/Channel"),
+			"Level":   m.GetInt64("Event/System/Level"),
+			"Task":    m.GetInt64("Event/System/Task"),
+		},
+	})
 
-	timestamp := m.GetTime("Event/System/TimeCreated/@SystemTime")
-	timezone, _ := timestamp.Zone()
-	message := m.GetString("Event/EventData/Data/#text")
+	log.Event.Kind = "event"
+	log.Event.Module = "EventLog"
+	log.Event.Dataset = "EventLog." + log.Labels["Channel"].(string)
+	log.Event.Severity = m.GetInt64("Event/System/Level")
+	log.Event.ID = m.GetString("Event/System/EventRecordID")
+	log.Event.Code = m.GetString("Event/System/EventID/#text")
+	log.Event.Provider = m.GetString("Event/System/Provider/@Name")
 
-	return NewLog(
-		src,
-		Base{
-			Timestamp: timestamp,
-			Message:   message,
-			Tags:      "EventLog",
-			Labels: map[string]interface{}{
-				"Channel": channel,
-				"Level":   m.GetInt64("Event/System/Level"),
-				"Task":    m.GetInt64("Event/System/Task"),
-			},
+	log.Host = &Host{
+		Hostname: m.GetString("Event/System/Computer"),
+	}
+
+	log.User = &User{
+		ID: m.GetString("Event/System/Security/@UserID"),
+	}
+
+	log.Process = &Process{
+		PID: m.GetInt64("Event/System/Execution/@ProcessID"),
+		Thread: &Thread{
+			ID: m.GetInt64("Event/System/Execution/@ThreadID"),
 		},
-		Evt{
-			Kind:     "event",
-			Module:   "EventLog",
-			Dataset:  "EventLog." + channel,
-			Severity: m.GetInt64("Event/System/Level"),
-			ID:       m.GetString("Event/System/EventRecordID"),
-			Code:     m.GetString("Event/System/EventID/#text"),
-			Provider: m.GetString("Event/System/Provider/@Name"),
-			Timezone: timezone,
-			Created:  timestamp,
-			Ingested: time.Now().UTC(),
-			Original: s,
-			Hash:     GetHash(s),
-		},
-		Host{
-			Hostname: m.GetString("Event/System/Computer"),
-			Name:     m.GetString("Event/System/Computer"),
-		},
-		User{
-			ID: m.GetString("Event/System/Security/@UserID"),
-		},
-		Process{
-			PID:      m.GetInt64("Event/System/Execution/@ProcessID"),
-			ThreadID: m.GetInt64("Event/System/Execution/@ThreadID"),
-		},
-	), nil
+	}
+
+	return
 }

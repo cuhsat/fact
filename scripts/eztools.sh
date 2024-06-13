@@ -28,6 +28,7 @@ mkdir -p $BIN $TMP
 
 download "EvtxECmd" && installMap "EvtxECmd" "EvtxeCmd"
 download "JLECmd" && install "JLECmd"
+download "SBECmd" && install "SBECmd"
 
 rm -rf $TMP
 

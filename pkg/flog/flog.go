@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/cuhsat/fact/internal/fact"
@@ -18,19 +19,26 @@ import (
 type fnlog func(string, string, bool) ([]string, error)
 
 func Log(files []string, dir string, jp bool) error {
+	usrHives := []string{
+		"ntuser.dat",
+		"usrclass.dat",
+	}
+
 	g := new(errgroup.Group)
 
 	for _, f := range files {
 		var fn fnlog
 
+		name := strings.ToLower(filepath.Base(f))
 		ext := strings.ToLower(filepath.Ext(f))
 
-		if ext == "evtx" {
+		if ext == ".evtx" {
 			fn = LogEvent
 		} else if strings.HasSuffix(ext, "destinations-ms") {
 			fn = LogJumpList
+		} else if slices.Contains(usrHives, name) {
+			fn = LogShellBag
 		} else {
-			sys.Error("ignored", f)
 			continue
 		}
 
@@ -44,7 +52,7 @@ func Log(files []string, dir string, jp bool) error {
 }
 
 func LogEvent(src, dir string, jp bool) (logs []string, err error) {
-	log, err := flog.EvtxeCmd(src, dir)
+	log, err := flog.Evtxe(src, dir)
 
 	if err != nil {
 		return
@@ -82,7 +90,7 @@ func LogEvent(src, dir string, jp bool) (logs []string, err error) {
 }
 
 func LogJumpList(src, dir string, jp bool) (logs []string, err error) {
-	log, err := flog.JleCmd(src, dir)
+	log, err := flog.Jle(src, dir)
 
 	if err != nil {
 		return
@@ -104,6 +112,48 @@ func LogJumpList(src, dir string, jp bool) (logs []string, err error) {
 		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
 
 		m, err := ecs.MapJumpList(l, src)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		log, err = write(m, dst, jp)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		logs = append(logs, log)
+	}
+
+	return logs, nil
+}
+
+func LogShellBag(src, dir string, jp bool) (logs []string, err error) {
+	log, err := flog.Sbe(src, dir)
+
+	if err != nil {
+		return
+	}
+
+	if _, err = os.Stat(log); os.IsNotExist(err) {
+		return logs, nil
+	}
+
+	ll, err := flog.ConsumeCsv(log)
+
+	if err != nil {
+		return
+	}
+
+	f := flog.BaseFile(src)
+
+	for i, l := range ll {
+		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
+
+		m, err := ecs.MapShellBag(l, src)
 
 		if err != nil {
 			sys.Error(err)

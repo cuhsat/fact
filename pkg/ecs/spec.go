@@ -16,14 +16,23 @@ const (
 )
 
 type Log struct {
-	Ecs     Ecs     `json:"ecs"`
-	Agent   Agent   `json:"agent"`
-	Base    Base    `json:"base"`
-	File    File    `json:"file,omitempty"`
-	Event   Evt     `json:"event,omitempty"`
-	Host    Host    `json:"host,omitempty"`
-	User    User    `json:"user,omitempty"`
-	Process Process `json:"process,omitempty"`
+	Base
+
+	Ecs      *Ecs      `json:"ecs"`
+	Agent    *Agent    `json:"agent"`
+	Event    *Evt      `json:"event"`
+	File     *File     `json:"file"`
+	Host     *Host     `json:"host,omitempty"`
+	User     *User     `json:"user,omitempty"`
+	Process  *Process  `json:"process,omitempty"`
+	Registry *Registry `json:"registry,omitempty"`
+}
+
+type Base struct {
+	Timestamp time.Time              `json:"@timestamp"`
+	Message   string                 `json:"message"`
+	Tags      string                 `json:"tags,omitempty"`
+	Labels    map[string]interface{} `json:"labels,omitempty"`
 }
 
 type Ecs struct {
@@ -35,22 +44,6 @@ type Agent struct {
 	Version string `json:"version"`
 }
 
-type Base struct {
-	Timestamp time.Time              `json:"@timestamp"`
-	Message   string                 `json:"message"`
-	Tags      string                 `json:"tags,omitempty"`
-	Labels    map[string]interface{} `json:"labels,omitempty"`
-}
-
-type File struct {
-	Name        string `json:"name,omitempty"`
-	Directory   string `json:"directory,omitempty"`
-	Extension   string `json:"extension,omitempty"`
-	DriveLetter string `json:"drive_letter,omitempty"`
-	Path        string `json:"path,omitempty"`
-	Type        string `json:"type,omitempty"`
-}
-
 type Evt struct {
 	Kind     string    `json:"kind,omitempty"`
 	Module   string    `json:"module,omitempty"`
@@ -59,16 +52,22 @@ type Evt struct {
 	ID       string    `json:"id,omitempty"`
 	Code     string    `json:"code,omitempty"`
 	Provider string    `json:"provider,omitempty"`
-	Timezone string    `json:"timezone,omitempty"`
-	Created  time.Time `json:"created,omitempty"`
 	Ingested time.Time `json:"ingested,omitempty"`
 	Original string    `json:"original,omitempty"`
 	Hash     string    `json:"hash,omitempty"`
 }
 
+type File struct {
+	Type        string `json:"type,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Extension   string `json:"extension,omitempty"`
+	Directory   string `json:"directory,omitempty"`
+	DriveLetter string `json:"drive_letter,omitempty"`
+	Path        string `json:"path,omitempty"`
+}
+
 type Host struct {
 	Hostname string `json:"hostname,omitempty"`
-	Name     string `json:"name,omitempty"`
 	MAC      string `json:"mac,omitempty"`
 }
 
@@ -77,51 +76,65 @@ type User struct {
 }
 
 type Process struct {
-	PID              int64     `json:"pid,omitempty"`
-	ThreadID         int64     `json:"thread.id,omitempty"`
-	EntityID         string    `json:"entity_id,omitempty"`
-	Start            time.Time `json:"start,omitempty"`
-	Name             string    `json:"name,omitempty"`
-	Title            string    `json:"title,omitempty"`
-	Args             []string  `json:"args,omitempty"`
-	ArgsCount        int64     `json:"args_count,omitempty"`
-	Executable       string    `json:"executable,omitempty"`
-	CommandLine      string    `json:"command_line,omitempty"`
-	WorkingDirectory string    `json:"working_directory,omitempty"`
+	PID              int64    `json:"pid,omitempty"`
+	Thread           *Thread  `json:"thread,omitempty"`
+	EntityID         string   `json:"entity_id,omitempty"`
+	Name             string   `json:"name,omitempty"`
+	Title            string   `json:"title,omitempty"`
+	Args             []string `json:"args,omitempty"`
+	ArgsCount        int64    `json:"args_count,omitempty"`
+	Executable       string   `json:"executable,omitempty"`
+	CommandLine      string   `json:"command_line,omitempty"`
+	WorkingDirectory string   `json:"working_directory,omitempty"`
 }
 
-func NewLog(src string, base Base, event Evt, host Host, user User, process Process) *Log {
+type Thread struct {
+	ID int64 `json:"id,omitempty"`
+}
+
+type Registry struct {
+	Path  string `json:"path,omitempty"`
+	Hive  string `json:"hive,omitempty"`
+	Key   string `json:"key,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+
+func NewLog(s, src string, base *Base) *Log {
 	return &Log{
-		Ecs: Ecs{
+		Base: *base,
+		Ecs: &Ecs{
 			Version: Version,
 		},
-		Agent: Agent{
+		Agent: &Agent{
 			Type:    fact.Product,
 			Version: fact.Version,
 		},
-		Base: base,
-		File: File{
-			Name:        filepath.Base(src),
-			Directory:   r(filepath.Abs(filepath.Dir(src))),
-			Extension:   strings.Replace(filepath.Ext(src), ".", "", 1),
-			DriveLetter: strings.Replace(filepath.VolumeName(src), ":", "", 1),
-			Path:        r(filepath.Abs(src)),
-			Type:        "file",
+		Event: &Evt{
+			Ingested: time.Now().UTC(),
+			Original: s,
+			Hash:     hash(s),
 		},
-		Event:   event,
-		Host:    host,
-		User:    user,
-		Process: process,
+		File: file(src),
 	}
 }
 
-func GetHash(s string) string {
+func file(f string) *File {
+	dir, _ := filepath.Abs(filepath.Dir(f))
+	abs, _ := filepath.Abs(f)
+
+	return &File{
+		Type:        "file",
+		Name:        filepath.Base(f),
+		Extension:   strings.Replace(filepath.Ext(f), ".", "", 1),
+		DriveLetter: strings.Replace(filepath.VolumeName(f), ":", "", 1),
+		Directory:   dir,
+		Path:        abs,
+	}
+}
+
+func hash(s string) string {
 	h := sha1.New()
 	h.Write([]byte(s))
 
 	return hex.EncodeToString(h.Sum(nil))
-}
-
-func r(a string, _ error) string {
-	return a
 }

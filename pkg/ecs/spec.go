@@ -112,10 +112,17 @@ func NewLog(s, src string, base *Base) *Log {
 		Event: &Evt{
 			Ingested: time.Now().UTC(),
 			Original: s,
-			Hash:     hash(s),
+			Hash:     Hash(s),
 		},
 		File: file(src),
 	}
+}
+
+func Hash(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+
+	return hex.EncodeToString(h.Sum(nil))
 }
 
 func file(f string) *File {
@@ -130,11 +137,4 @@ func file(f string) *File {
 		Directory:   dir,
 		Path:        abs,
 	}
-}
-
-func hash(s string) string {
-	h := sha1.New()
-	h.Write([]byte(s))
-
-	return hex.EncodeToString(h.Sum(nil))
 }

@@ -64,10 +64,8 @@ func LogEvent(src, dir string, jp bool) (logs []string, err error) {
 		return
 	}
 
-	f := flog.BaseFile(src)
-
-	for i, l := range ll {
-		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
+	for _, l := range ll {
+		dst := filepath.Join(dir, fmt.Sprintf("%s.json", ecs.Hash(l)))
 
 		m, err := ecs.MapEvent(l, src)
 
@@ -106,10 +104,8 @@ func LogJumpList(src, dir string, jp bool) (logs []string, err error) {
 		return
 	}
 
-	f := flog.BaseFile(src)
-
-	for i, l := range ll {
-		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
+	for _, l := range ll {
+		dst := filepath.Join(dir, fmt.Sprintf("%s.json", ecs.Hash(l)))
 
 		m, err := ecs.MapJumpList(l, src)
 
@@ -148,10 +144,8 @@ func LogShellBag(src, dir string, jp bool) (logs []string, err error) {
 		return
 	}
 
-	f := flog.BaseFile(src)
-
-	for i, l := range ll {
-		dst := filepath.Join(dir, fmt.Sprintf("%s_%08d.json", f, i))
+	for _, l := range ll {
+		dst := filepath.Join(dir, fmt.Sprintf("%s.json", ecs.Hash(l)))
 
 		m, err := ecs.MapShellBag(l, src)
 

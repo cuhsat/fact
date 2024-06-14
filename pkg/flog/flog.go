@@ -24,6 +24,11 @@ func Log(files []string, dir string, jp bool) error {
 		"usrclass.dat",
 	}
 
+	usrHistory := []string{
+		"history",
+		"places.sqlite",
+	}
+
 	g := new(errgroup.Group)
 
 	for _, f := range files {
@@ -38,6 +43,8 @@ func Log(files []string, dir string, jp bool) error {
 			fn = LogJumpList
 		} else if slices.Contains(usrHives, name) {
 			fn = LogShellBag
+		} else if slices.Contains(usrHistory, name) {
+			fn = LogHistory
 		} else {
 			continue
 		}
@@ -155,6 +162,40 @@ func LogShellBag(src, dir string, jp bool) (logs []string, err error) {
 		}
 
 		log, err = write(m, dst, jp)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		logs = append(logs, log)
+	}
+
+	return logs, nil
+}
+
+func LogHistory(src, dir string, jp bool) (logs []string, err error) {
+	ll, err := flog.History(src)
+
+	if err != nil {
+		return
+	}
+
+	if err = os.MkdirAll(dir, sys.MODE_DIR); err != nil {
+		return
+	}
+
+	for _, l := range ll {
+		dst := filepath.Join(dir, fmt.Sprintf("%s.json", ecs.Hash(fmt.Sprint(l))))
+
+		m, err := ecs.MapHistory(&l, src)
+
+		if err != nil {
+			sys.Error(err)
+			continue
+		}
+
+		log, err := write(m, dst, jp)
 
 		if err != nil {
 			sys.Error(err)

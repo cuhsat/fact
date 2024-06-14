@@ -22,6 +22,7 @@ type Log struct {
 	Agent    *Agent    `json:"agent"`
 	Event    *Evt      `json:"event"`
 	File     *File     `json:"file"`
+	Url      *Url      `json:"url,omitempty"`
 	Host     *Host     `json:"host,omitempty"`
 	User     *User     `json:"user,omitempty"`
 	Process  *Process  `json:"process,omitempty"`
@@ -64,6 +65,19 @@ type File struct {
 	Directory   string `json:"directory,omitempty"`
 	DriveLetter string `json:"drive_letter,omitempty"`
 	Path        string `json:"path,omitempty"`
+}
+
+type Url struct {
+	Original string `json:"original,omitempty"`
+	Full     string `json:"full,omitempty"`
+	Scheme   string `json:"scheme,omitempty"`
+	Domain   string `json:"domain,omitempty"`
+	Port     int64  `json:"port,omitempty"`
+	Path     string `json:"path,omitempty"`
+	Query    string `json:"query,omitempty"`
+	Fragment string `json:"fragment,omitempty"`
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 type Host struct {

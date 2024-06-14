@@ -1,8 +1,9 @@
-# FACT
-Forensic Artifacts Collecting Toolkit.
+# Forensic Artifacts Collecting Toolkit
+
+A basic shell pipeline for extracting forensic artifacts from disk images. Relevant artifacts will be processed and provided in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format for ingestion with [Logstash](https://www.elastic.co/de/logstash).
 
 ```sh
-# fmount image.dd | ffind | flog
+# fmount image.dd | ffind | flog -D logstash
 ```
 
 ## Tools
@@ -99,14 +100,12 @@ Required system commands:
 
 > Use `make tools` to install [Eric Zimmerman's Tools](https://ericzimmerman.github.io/#!index.md).
 
-#### Roadmap
-- [ ] [System Active Directory](https://forensics.wiki/active_directory/)
-- [ ] [System Prefetch Files](https://forensics.wiki/prefetch/)
-- [x] [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)
-- [ ] [System AmCache](https://forensics.wiki/amcache/)
-- [x] [User JumpLists](https://forensics.wiki/jump_lists/)
-- [x] [User ShellBags](https://forensics.wiki/shell_item/)
-- [ ] [User Browser Histories](https://forensics.wiki/google_chrome/)
+Supported artifacts for Windows 7+ systems:
+
+- [System Event Logs](https://forensics.wiki/windows_event_log_%28evt%29/)
+- [User JumpLists](https://forensics.wiki/jump_lists/)
+- [User ShellBags](https://forensics.wiki/shell_item/)
+- [User Browser Histories](https://forensics.wiki/google_chrome/)
 
 ## License
 Released under the [MIT License](LICENSE).

@@ -157,6 +157,55 @@ func TestLogShellbag(t *testing.T) {
 	}
 }
 
+func TestLogHistory(t *testing.T) {
+	cases := []struct {
+		name, data, file string
+	}{
+		{
+			name: "Test log history",
+			data: test.Testdata("windows", "user.zip"),
+			file: "History",
+		},
+		{
+			name: "Test log places.sqlite",
+			data: test.Testdata("windows", "user.zip"),
+			file: "places.sqlite",
+		},
+	}
+
+	for _, tt := range cases {
+		tmp, _ := os.MkdirTemp(os.TempDir(), "log")
+
+		err := zip.Unzip(tt.data, tmp)
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		t.Run(tt.name, func(t *testing.T) {
+			l, err := LogHistory(filepath.Join(tmp, tt.file), tmp, true)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(l) == 0 {
+				t.Fatal("file count zero")
+			}
+
+			b, err := os.ReadFile(l[0])
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if !json.Valid(b) {
+				t.Fatal("invalid json")
+			}
+		})
+	}
+}
+
 func TestStripHash(t *testing.T) {
 	cases := []struct {
 		name, file, hash string

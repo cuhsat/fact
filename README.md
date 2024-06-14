@@ -80,7 +80,7 @@ Supported artifacts for Windows 7+ systems:
 - [User Browser Histories](https://forensics.wiki/google_chrome/)
 
 ### flog
-Log forensic artifacts as JSON in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html).
+Log forensic artifacts as JSON in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format.
 
 ```sh
 $ flog [-pqhv] [-D DIRECTORY] [FILE ...]

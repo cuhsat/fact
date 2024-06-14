@@ -15,7 +15,9 @@ import (
 func TestMain(m *testing.M) {
 	sys.Progress = nil
 
-	os.Exit(m.Run())
+	if len(os.Getenv("CI")) == 0 {
+		os.Exit(m.Run())
+	}
 }
 
 func TestMount(t *testing.T) {

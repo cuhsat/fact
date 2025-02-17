@@ -60,6 +60,10 @@ func main() {
 
 	mnts, _ := sys.Args()
 
+	if len(mnts) == 0 {
+		mnts = append(mnts, "") // Live mode
+	}
+
 	if *v {
 		sys.Final("ffind", fact.Version)
 	}

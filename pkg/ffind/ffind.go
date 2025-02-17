@@ -184,6 +184,8 @@ func (ff *ffind) list(in <-chan string, out chan<- string) {
 		sys.Fatal(err)
 	}
 
+	defer w.Flush()
+
 	for artifact := range in {
 		err = w.Write(internal.Record(artifact))
 

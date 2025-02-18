@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 BIN="bin"
 TMP="$BIN/tmp"
-URL="https://f001.backblazeb2.com/file/EricZimmermanTools/net6"
+URL="https://download.ericzimmermanstools.com/net6/"
 
 echo "Download tools"
 

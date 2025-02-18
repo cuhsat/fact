@@ -8,7 +8,7 @@ echo "Download tools"
 download () {
     if [ ! -f "$BIN/$1.dll" ] ; then
         echo "--- $1"
-        curl -s "$URL/$1.zip" | busybox unzip -qq -o -l -d $TMP -
+        curl -s "$URL/$1.zip" | unzip -qq -o -d $TMP -
     else
         return 1
     fi

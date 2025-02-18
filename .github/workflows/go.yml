@@ -11,17 +11,14 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu:22.04
     steps:
     - uses: actions/checkout@v3
 
     - name: Set up OS
       run: |
         sudo apt update -y
-        sudo apt install -y software-properties-common
-        sudo add-apt-repository ppa:dotnet/backports
-        sudo apt update -y
-        sudo apt install -y qemu-utils dotnet-runtime-9.0
+        sudo apt install -y qemu-utils dotnet6
 
     - name: Set up Go
       uses: actions/setup-go@v3

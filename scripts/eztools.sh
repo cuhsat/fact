@@ -8,8 +8,8 @@ echo "Download tools"
 download () {
     if [ ! -f "$BIN/$1.dll" ] ; then
         echo "--- $1"
-        curl -s "$URL/$1.zip"
-		unzip -qq -o "$1.zip" -d "$TMP"
+        wget "$URL/$1.zip"
+		unzip -o "$1.zip" -d "$TMP"
     else
         return 1
     fi

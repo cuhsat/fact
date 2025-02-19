@@ -153,6 +153,12 @@ func (ff *ffind) comp(in <-chan string, out chan<- string) {
 
 	defer z.Close()
 
+	err = z.SetComment(fmt.Sprintf("ffind %s", fact.Version))
+
+	if err != nil {
+		sys.Error(err)
+	}
+
 	for artifact := range in {
 		err := z.Write(artifact, ff.path(artifact))
 

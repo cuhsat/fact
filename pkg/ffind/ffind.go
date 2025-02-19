@@ -7,7 +7,6 @@ import (
 	"os"
 	"runtime"
 	"sync"
-	"time"
 
 	"github.com/cuhsat/fact/internal/fact"
 	"github.com/cuhsat/fact/internal/fact/hash"
@@ -145,19 +144,13 @@ func (ff *ffind) comp(in <-chan string, out chan<- string) {
 	defer close(out)
 	defer ff.wg.Done()
 
-	z, err := zip.NewZip(ff.zip, time.Now().Format(time.RFC3339))
+	z, err := zip.NewZip(ff.zip, fmt.Sprintf("ffind %s", fact.Version))
 
 	if err != nil {
 		sys.Fatal(err)
 	}
 
 	defer z.Close()
-
-	err = z.SetComment(fmt.Sprintf("ffind %s", fact.Version))
-
-	if err != nil {
-		sys.Error(err)
-	}
 
 	for artifact := range in {
 		err := z.Write(artifact, ff.path(artifact))

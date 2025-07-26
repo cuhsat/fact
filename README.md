@@ -108,4 +108,4 @@ Supported artifacts for Windows 7+ systems:
 - [User Browser Histories](https://forensics.wiki/google_chrome/)
 
 ## License
-Released under the [MIT License](LICENSE).
+Released under the [MIT License](LICENSE.md).

@@ -96,7 +96,7 @@ Available options:
 
 Required system commands:
 
-- [dotnet](https://dotnet.microsoft.com/en-us/download/dotnet/6.0)
+- [dotnet](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
 
 > Use `make tools` to install [Eric Zimmerman's Tools](https://ericzimmerman.github.io/#!index.md).
 

@@ -23,6 +23,3 @@ go.work
 # Fact files
 bin/
 tmp/
-
-# Tools
-*.zip

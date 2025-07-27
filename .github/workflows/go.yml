@@ -17,8 +17,9 @@ jobs:
 
     - name: Set up OS
       run: |
+        sudo add-apt-repository ppa:dotnet/backports
         sudo apt update -y
-        sudo apt install -y qemu-utils dotnet-runtime-9.0
+        sudo apt install -y qemu-utils dotnet9
 
     - name: Set up Go
       uses: actions/setup-go@v3

@@ -32,10 +32,19 @@ func TestMount(t *testing.T) {
 	}
 
 	for _, tt := range cases {
-		tmp, _ := os.MkdirTemp(os.TempDir(), tt.path)
-		mnt, _ := os.MkdirTemp(os.TempDir(), tt.path+"-mnt")
+		tmp, err := os.MkdirTemp(os.TempDir(), tt.path)
 
-		err := zip.Unzip(tt.file, tmp)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		mnt, err := os.MkdirTemp(os.TempDir(), tt.path+"-mnt")
+
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = zip.Unzip(tt.file, tmp)
 
 		if err != nil {
 			t.Fatal(err)

@@ -15,7 +15,7 @@ import (
 func TestMain(m *testing.M) {
 	sys.Progress = nil
 
-	if _, ci := os.LookupEnv("CI"); !ci {
+	if _, ci := os.LookupEnv("GITHUB_ACTIONS"); !ci {
 		os.Exit(m.Run())
 	}
 }

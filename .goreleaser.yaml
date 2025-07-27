@@ -12,6 +12,7 @@ builds:
     goarch:
       - amd64
       - arm64
+    binary: ffind
     main: ./cmd/ffind/main.go
 
 archives:

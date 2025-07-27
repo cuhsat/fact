@@ -15,7 +15,7 @@ import (
 func TestMain(m *testing.M) {
 	sys.Progress = nil
 
-	if os.Getenv("CI") == "" {
+	if _, ci := os.LookupEnv("CI"); !ci {
 		os.Exit(m.Run())
 	}
 }

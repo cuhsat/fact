@@ -2,7 +2,7 @@
 
 A basic shell pipeline for extracting forensic artifacts from disk images. Relevant artifacts will be processed and provided in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format for ingestion with [Logstash](https://www.elastic.co/de/logstash).
 
-```sh
+```console
 # fmount image.dd | ffind | flog -D logstash
 ```
 
@@ -11,7 +11,7 @@ A basic shell pipeline for extracting forensic artifacts from disk images. Relev
 ### fmount
 Mount disk images for read-only processing.
 
-```sh
+```console
 # fmount [-ruszqhv] [-H CRC32|MD5|SHA1|SHA256] [-V SUM] [-B KEY] [-D DIR] IMAGE
 ```
 
@@ -51,7 +51,7 @@ Required system commands:
 ### ffind
 Find forensic artifacts in mount points or on the live system.
 
-```sh
+```console
 $ ffind [-rcsuqhv] [-H CRC32|MD5|SHA1|SHA256] [-C CSV] [-Z ZIP] [MOUNT ...]
 ```
 
@@ -82,7 +82,7 @@ Supported artifacts for Windows 7+ systems:
 ### flog
 Log forensic artifacts as JSON in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format.
 
-```sh
+```console
 $ flog [-pqhv] [-D DIRECTORY] [FILE ...]
 ```
 

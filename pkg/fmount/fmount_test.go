@@ -25,14 +25,9 @@ func TestMount(t *testing.T) {
 		name, file, path string
 	}{
 		{
-			name: "Test mount with dd image",
-			file: test.Testdata("windows", "disk.dd.zip"),
-			path: "dd",
-		},
-		{
-			name: "Test mount with vmdk image",
-			file: test.Testdata("windows", "disk.vmdk.zip"),
-			path: "dd",
+			name: "Test mount with disk image",
+			file: test.Testdata("windows", "disk.zip"),
+			path: "disk",
 		},
 	}
 

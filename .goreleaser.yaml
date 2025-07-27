@@ -62,6 +62,7 @@ builds:
     main: ./cmd/flog/main.go
 
 archives:
+  allow_different_binary_count: true
   - formats: [tar.gz]
     format_overrides:
       - goos: windows

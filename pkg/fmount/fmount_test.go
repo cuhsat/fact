@@ -16,12 +16,15 @@ func TestMain(m *testing.M) {
 	sys.Progress = nil
 
 	if _, ci := os.LookupEnv("CI"); !ci {
-		// Skip Githubs faulty tests for now
-		// os.Exit(m.Run())
+		os.Exit(m.Run())
 	}
 }
 
 func TestMount(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping test in short mode")
+	}
+
 	cases := []struct {
 		name, file, path string
 	}{

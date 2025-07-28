@@ -1,15 +1,16 @@
 # Forensic Artifacts Collecting Toolkit
 
-A basic shell pipeline for extracting forensic artifacts from disk images. Relevant artifacts will be processed and provided in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format for ingestion with [Logstash](https://www.elastic.co/de/logstash).
+A shell pipeline for extracting forensic artifacts from disk images in [ECS](https://www.elastic.co/guide/en/ecs/current/index.html) format. Important artifacts will be processed and provided for ingestion with [Logstash](https://www.elastic.co/de/logstash).
 
 ```console
-# fmount disk.dd | ffind | flog -D artifacts
+# fmount disk.raw | ffind | flog -D logstash
 ```
 
-## Tools
-- [fmount](docs/fmount.md)
-- [ffind](docs/ffind.md)
-- [flog](docs/flog.md)
+## [fmount](https://github.com/hiforensics/fmount)
+Mount various disk images for forensic read-only processing.
 
-## License
-Released under the [MIT License](LICENSE.md).
+## [ffind](https://github.com/hiforensics/ffind)
+Find forensic artifacts in mount points or the live system.
+
+## [flog](https://github.com/hiforensics/flog)
+Log forensic artifacts as JSON in ECS format.

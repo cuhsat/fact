@@ -14,3 +14,6 @@ Find forensic artifacts in mount points or the live system.
 
 ## [flog](https://github.com/hiforensics/flog)
 Log forensic artifacts as JSON in ECS format.
+
+## License
+All released under the [MIT License](LICENSE.md).

@@ -6,13 +6,13 @@ A shell pipeline for extracting forensic artifacts from disk images in [ECS](htt
 # fmount disk.raw | ffind | flog -D logstash
 ```
 
-## [fmount](https://github.com/hiforensics/fmount)
+## [fmount](https://github.com/cuhsat/fmount)
 Mount various disk images for forensic read-only processing.
 
-## [ffind](https://github.com/hiforensics/ffind)
+## [ffind](https://github.com/cuhsat/ffind)
 Find forensic artifacts in mount points or the live system.
 
-## [flog](https://github.com/hiforensics/flog)
+## [flog](https://github.com/cuhsat/flog)
 Log forensic artifacts as JSON in ECS format.
 
 ## License
